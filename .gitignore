@@ -1,0 +1,9 @@
+# 金鑰與密碼，不放進 GitHub
+.env
+.env.*
+*.key
+*.pem
+
+# 套件與系統檔
+node_modules/
+.DS_Store

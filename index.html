@@ -1,0 +1,2691 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif;background:#fafafa}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>網紅自媒體合作供稿審核系統</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@700&display=swap">
+<style>
+/* 版面：校稿桌。左側人選名單、右側稿面；稿紙橫線只出現在內文區；每位審稿員有自己的文字顏色。 */
+:root{
+  --bg:#EEF1F6; --surface:#FFFFFF; --sunk:#F4F6FA; --ink:#16213A; --ink-2:#556178;
+  --line:#DCE2EB; --line-2:#C5CEDC; --accent:#2457D6;
+  --primary:#16213A; --on-primary:#FFFFFF;
+  --ok:#17724A; --ok-bg:#E1F4EA; --warn:#8A5A00; --warn-bg:#FFF1CF;
+  --rev:#5444BE; --rev-bg:#ECE9FB; --bad:#B02F2A; --bad-bg:#FBE4E2;
+  --info:#1E5FB8; --info-bg:#E2EDFB; --none:#5B677C; --none-bg:#E8ECF2;
+  --av-bg:88%; --av-fg:26%; --ru-l:34%; --ru-bg:93%;
+  --shadow:0 1px 2px rgba(22,33,58,.05),0 8px 24px rgba(22,33,58,.05);
+  --shadow2:0 2px 4px rgba(22,33,58,.05),0 16px 40px rgba(22,33,58,.09);
+  --accent-soft:#E8EEFC; --margin:#EBC3BE; --ring:rgba(36,87,214,.24);
+  --f-sans:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+  --f-serif:"Noto Serif TC","Songti TC","PMingLiU",serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0D1320; --surface:#152033; --sunk:#101A2B; --ink:#E6EBF4; --ink-2:#9AA7BE;
+    --line:#27344B; --line-2:#37466A; --accent:#86A8FF;
+    --primary:#E6EBF4; --on-primary:#0D1320;
+    --ok:#62D69C; --ok-bg:#12372A; --warn:#F0C25E; --warn-bg:#3A2D0E;
+    --rev:#B7ADFF; --rev-bg:#2A2455; --bad:#FF918A; --bad-bg:#45191B;
+    --info:#8DB8FF; --info-bg:#18305A; --none:#A5B0C4; --none-bg:#222D42;
+    --av-bg:28%; --av-fg:84%; --ru-l:74%; --ru-bg:24%; --shadow:0 1px 2px rgba(0,0,0,.45); --shadow2:0 2px 6px rgba(0,0,0,.5),0 16px 40px rgba(0,0,0,.35);
+    --accent-soft:#1B2B52; --margin:#6B3B3F; --ring:rgba(134,168,255,.34);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0D1320; --surface:#152033; --sunk:#101A2B; --ink:#E6EBF4; --ink-2:#9AA7BE;
+  --line:#27344B; --line-2:#37466A; --accent:#86A8FF;
+  --primary:#E6EBF4; --on-primary:#0D1320;
+  --ok:#62D69C; --ok-bg:#12372A; --warn:#F0C25E; --warn-bg:#3A2D0E;
+  --rev:#B7ADFF; --rev-bg:#2A2455; --bad:#FF918A; --bad-bg:#45191B;
+  --info:#8DB8FF; --info-bg:#18305A; --none:#A5B0C4; --none-bg:#222D42;
+  --av-bg:28%; --av-fg:84%; --ru-l:74%; --ru-bg:24%; --shadow:0 1px 2px rgba(0,0,0,.45); --shadow2:0 2px 6px rgba(0,0,0,.5),0 16px 40px rgba(0,0,0,.35);
+  --accent-soft:#1B2B52; --margin:#6B3B3F; --ring:rgba(134,168,255,.34);
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:15px/1.65 var(--f-sans);-webkit-text-size-adjust:100%}
+button,input,select,textarea{font:inherit;color:inherit}
+h1,h2,h3,p,ul,dl,dd,fieldset{margin:0;padding:0}
+ul{list-style:none}
+h1,h2,h3{text-wrap:balance}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.muted{color:var(--ink-2)}
+.small{font-size:13px}
+.eyebrow{font-size:12px;letter-spacing:.12em;color:var(--ink-2);font-weight:500}
+
+#app{max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:14px 56px}
+.boot{padding:80px 0;text-align:center;color:var(--ink-2)}
+
+/* 頂列 */
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding-block:6px 14px}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.seal{display:grid;place-items:center;width:38px;height:38px;border-radius:8px;background:var(--primary);color:var(--on-primary);font:700 20px/1 var(--f-serif);flex:none}
+.brand-name{font:700 17px/1.2 var(--f-serif)}
+.brand-sub{font-size:12px;color:var(--ink-2)}
+.top-r{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.me{display:flex;align-items:center;gap:8px}
+.me-t{display:flex;flex-direction:column;line-height:1.25}
+.me-t b{font-weight:500}
+.me-t span{font-size:12px;color:var(--ink-2)}
+.sync{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-2);border:1px solid var(--line);border-radius:99px;padding:3px 10px;background:var(--surface)}
+.sync i{width:7px;height:7px;border-radius:50%;background:var(--ok);display:block}
+.sync.local i{background:var(--warn)}
+.badge{display:inline-flex;align-items:center;font-size:12.5px;font-weight:500;padding:3px 10px;border-radius:99px;background:var(--rev-bg);color:var(--rev)}
+.banner{padding:10px 14px;border-radius:10px;font-size:13.5px;margin-bottom:14px;background:var(--warn-bg);color:var(--warn)}
+.banner.info{background:var(--none-bg);color:var(--ink)}
+.banner.bad{background:var(--bad-bg);color:var(--bad)}
+.banner .btn{margin-left:8px}
+
+/* 頭像與審稿員顏色 */
+.av{display:inline-grid;place-items:center;width:36px;height:36px;border-radius:50%;flex:none;font-weight:700;font-size:15px;
+  background:hsl(var(--h) 55% var(--av-bg));color:hsl(var(--h) 45% var(--av-fg))}
+.av.lg{width:48px;height:48px;font-size:19px}
+.ru{color:hsl(var(--h) 72% var(--ru-l));background:hsl(var(--h) 85% var(--ru-bg));border-radius:3px;padding:0 1px;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.by{font-size:12px;font-weight:500;padding:0 6px;border-radius:99px;margin-left:6px;white-space:nowrap}
+.sw{display:inline-block;width:10px;height:10px;border-radius:3px;background:hsl(var(--h) 72% var(--ru-l));flex:none}
+.sw.plain{background:var(--ink-2)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:16px;font-size:13px;color:var(--ink-2);align-items:center}
+.legend .lg{display:inline-flex;align-items:center;gap:6px}
+
+/* 按鈕與表單 */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:0 18px;border-radius:10px;
+  border:1px solid var(--line-2);background:var(--surface);color:var(--ink);font-weight:500;cursor:pointer;text-decoration:none}
+.btn:hover{border-color:var(--ink-2)}
+.btn.primary{background:var(--primary);border-color:var(--primary);color:var(--on-primary)}
+.btn.ghost{background:transparent;border-color:transparent}
+.btn.ghost:hover{background:var(--sunk)}
+.btn.sm{min-height:36px;padding:0 12px;font-size:13.5px}
+.btn.block{width:100%}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn.d-ok{border-color:var(--ok);color:var(--ok);background:var(--ok-bg)}
+.btn.d-rev{border-color:var(--rev);color:var(--rev);background:var(--rev-bg)}
+.btn.d-bad{border-color:var(--bad);color:var(--bad);background:var(--bad-bg)}
+label,.lbl{display:flex;align-items:baseline;justify-content:space-between;gap:8px;font-size:13.5px;font-weight:500;margin-bottom:6px}
+.opt{font-weight:400;color:var(--ink-2);font-size:12.5px}
+input,select,textarea{width:100%;min-height:44px;padding:9px 12px;border:1px solid var(--line-2);border-radius:8px;background:var(--surface)}
+input[type=checkbox],input[type=radio]{width:20px;min-height:20px;height:20px;padding:0;accent-color:var(--accent);flex:none;margin:2px 0 0}
+input[type=file]{padding:8px 10px}
+textarea{resize:vertical;min-height:96px}
+.fld{min-width:0}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.span2{grid-column:1/-1}
+.fld-meta{display:flex;justify-content:flex-end;font-size:12.5px;color:var(--ink-2);margin-top:4px}
+.err{color:var(--bad);font-size:13.5px}
+.errs{padding:10px 14px;border-radius:10px;background:var(--bad-bg);color:var(--bad);font-size:13.5px;margin-bottom:16px}
+.errs li{list-style:disc;margin-left:18px}
+.pf{display:flex;flex-wrap:wrap;gap:8px}
+.pf label{margin:0;display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 14px;border:1px solid var(--line-2);border-radius:99px;background:var(--surface);font-weight:400;cursor:pointer;font-size:14.5px}
+.pf label:has(input:checked){border-color:var(--accent);background:var(--sunk)}
+.inline{display:flex;gap:8px;align-items:stretch}
+.inline>input{flex:1;min-width:0}
+.linkrow{display:flex;gap:8px;margin-bottom:8px}
+.linkrow input{flex:1;min-width:0}
+.formsec{display:grid;gap:16px;padding-top:18px;margin-top:18px;border-top:1px solid var(--line)}
+.formsec>h3{font:700 16px/1.4 var(--f-serif)}
+.formsec .sub{font-size:13px;color:var(--ink-2);margin-top:-8px}
+
+/* 稿紙 */
+.paper{display:block;background-color:var(--surface);
+  background-image:repeating-linear-gradient(to bottom,transparent 0,transparent 27px,var(--line) 27px,var(--line) 28px);
+  background-attachment:local;line-height:28px;padding:0 14px;border:1px solid var(--line-2);border-radius:8px;font-size:15px}
+textarea.paper{min-height:308px;padding-block:0}
+textarea.paper.sm{min-height:140px}
+.paper.ro{white-space:pre-wrap;overflow-wrap:anywhere;border-color:var(--line)}
+.paper.ro.sm{min-height:56px}
+.tagline{overflow-wrap:anywhere;white-space:pre-wrap}
+
+/* 素材 */
+.mats{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.mat{display:flex;flex-direction:column;gap:6px;min-width:0;padding:8px;border:1px solid var(--line);border-radius:10px;background:var(--sunk);font-size:13px}
+.mat .thumb{width:100%;height:100px;object-fit:cover;border-radius:6px;background:var(--line);display:block}
+.mat video.thumb{object-fit:contain;background:#000}
+.mat .ph{display:grid;place-items:center;height:100px;border-radius:6px;background:var(--line);color:var(--ink-2);font-size:12px;text-align:center;padding:6px}
+.mat .nm{overflow-wrap:anywhere;line-height:1.4}
+.mat a{color:var(--accent)}
+.mat .row2{display:flex;justify-content:space-between;align-items:center;gap:6px}
+.mat-empty{color:var(--ink-2);font-size:14px}
+
+/* 狀態 */
+.pill{display:inline-flex;align-items:center;gap:5px;padding:2px 10px;border-radius:99px;font-size:13px;font-weight:500;white-space:nowrap}
+.pill .g{font-size:12px}
+.st-none{color:var(--none);background:var(--none-bg)}
+.st-pending{color:var(--warn);background:var(--warn-bg)}
+.st-confirming{color:var(--rev);background:var(--rev-bg)}
+.st-confirmed{color:var(--info);background:var(--info-bg)}
+.st-approved{color:var(--ok);background:var(--ok-bg)}
+
+/* 卡片 */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow)}
+.pad{padding:20px}
+.head{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,340px);gap:20px;align-items:start;margin-bottom:16px}
+.head h1{font:700 26px/1.3 var(--f-serif);margin-block:4px 6px}
+.head .brief{max-width:62ch;color:var(--ink-2)}
+.dl{padding:16px 18px}
+.dl-top{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.cd{font:500 22px/1.3 var(--f-mono);font-variant-numeric:tabular-nums}
+.cd.urgent{color:var(--warn)}
+.cd.closed{color:var(--bad)}
+.dl-date{font-size:13.5px;color:var(--ink-2);margin-top:2px}
+.dl details{margin-top:12px;border-top:1px solid var(--line);padding-top:10px}
+.dl summary{cursor:pointer;font-size:13.5px;font-weight:500;min-height:32px;display:flex;align-items:center}
+.dl-edit{display:grid;gap:10px;margin-top:8px}
+.dl-btns{display:flex;gap:8px;flex-wrap:wrap}
+
+/* 篩選 */
+.bar{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:14px}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 14px;border-radius:99px;border:1px solid var(--line-2);background:var(--surface);cursor:pointer;font-size:14px}
+.chip b{font:500 13px var(--f-mono);color:var(--ink-2)}
+.chip[aria-pressed=true]{background:var(--primary);color:var(--on-primary);border-color:var(--primary)}
+.chip[aria-pressed=true] b{color:inherit;opacity:.8}
+.prog{display:flex;align-items:center;gap:10px;font-size:13.5px;color:var(--ink-2)}
+.prog-bar{width:120px;height:6px;border-radius:99px;background:var(--line);overflow:hidden}
+.prog-bar i{display:block;height:100%;background:var(--ok)}
+
+/* 左右分欄 */
+.split{display:grid;grid-template-columns:minmax(300px,390px) minmax(0,1fr);gap:20px;align-items:start}
+.pane-list{overflow:hidden}
+.search{padding:12px;border-bottom:1px solid var(--line)}
+.row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:2px 12px;align-items:center;width:100%;text-align:left;
+  padding:12px 14px;border:0;border-bottom:1px solid var(--line);background:transparent;cursor:pointer;min-height:68px}
+.row:last-child{border-bottom:0}
+.row:hover{background:var(--sunk)}
+.row[aria-current=true]{background:var(--sunk)}
+.row[aria-current=true] .r-name{font-weight:700}
+.r-main{min-width:0;display:flex;flex-direction:column}
+.r-name{font-weight:500;line-height:1.35}
+.r-title{font-size:13px;color:var(--ink-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.r-side{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+.r-time{font-size:12px;color:var(--ink-2)}
+.nores{padding:28px 16px;text-align:center;color:var(--ink-2)}
+.pane-detail{min-width:0}
+.pane-detail>section,.pane-detail>div{padding:20px}
+.pane-detail>*+*{border-top:1px solid var(--line)}
+.dhead{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.dwho{display:flex;align-items:center;gap:12px;min-width:0}
+.dwho h2{font:700 20px/1.3 var(--f-serif)}
+.dstat{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.only-m{display:none}
+.tool{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.tool h3{font:700 16px/1.4 var(--f-serif)}
+.tool .btns{display:flex;gap:8px;flex-wrap:wrap}
+.meta{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 20px;margin-bottom:18px}
+.meta dt{font-size:12.5px;color:var(--ink-2)}
+.meta dd{overflow-wrap:anywhere}
+.meta .full{grid-column:1/-1}
+.meta .ttl{font:700 18px/1.5 var(--f-serif)}
+.chipset{display:flex;flex-wrap:wrap;gap:6px}
+.tag{font-size:13px;padding:2px 10px;border-radius:6px;background:var(--sunk);border:1px solid var(--line);color:var(--ink)}
+.story{margin-top:22px;padding-top:18px;border-top:1px dashed var(--line-2)}
+.story h3{font:700 16px/1.4 var(--f-serif);margin-bottom:12px}
+.linklist{display:grid;gap:4px}
+.linklist a{color:var(--accent);overflow-wrap:anywhere}
+.empty{padding:36px 20px;text-align:center;color:var(--ink-2)}
+.empty h3{color:var(--ink);font:700 17px var(--f-serif);margin-bottom:6px}
+.empty .btn{margin-top:14px}
+
+/* 審稿面板 */
+.rv h3,.hist h3,.points-card h3{font:700 16px/1.4 var(--f-serif);margin-bottom:10px}
+.rv fieldset{border:0;min-width:0;margin-bottom:16px}
+.rv legend{display:flex;justify-content:space-between;width:100%;font-size:13.5px;font-weight:500;margin-bottom:6px;padding:0}
+.chk{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px dashed var(--line);font-size:14.5px;font-weight:400;margin:0;cursor:pointer;justify-content:flex-start}
+.chk:last-child{border-bottom:0}
+.decide{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px}
+.decide+.btn{margin-top:10px}
+.note-box{padding:12px 14px;border-radius:10px;margin-bottom:16px;font-size:14.5px;background:var(--sunk);border:1px solid var(--line)}
+.note-box .who{font-size:12.5px;color:var(--ink-2);margin-bottom:2px;font-weight:500}
+.note-box p{white-space:pre-wrap;overflow-wrap:anywhere;color:var(--ink)}
+.note-box.st-approved{background:var(--ok-bg);border-color:transparent}
+.note-box.st-confirmed{background:var(--info-bg);border-color:transparent}
+.note-box.st-confirming{background:var(--rev-bg);border-color:transparent}
+
+/* 時間軸 */
+.tl{display:flex;flex-direction:column;gap:12px}
+.tl li{display:grid;grid-template-columns:14px minmax(0,1fr);gap:10px}
+.tl .dot{width:10px;height:10px;border-radius:50%;margin-top:7px;background:var(--none)}
+.tl .t-submit,.tl .t-update{background:var(--accent)}
+.tl .t-edit{background:var(--warn)}
+.tl .t-notify{background:var(--rev)}
+.tl .t-confirm{background:var(--info)}
+.tl .t-approved{background:var(--ok)}
+.tl .t-line{display:flex;gap:6px 10px;flex-wrap:wrap;align-items:baseline}
+.tl .t-note{font-size:13.5px;color:var(--ink-2);overflow-wrap:anywhere}
+
+/* 人選頁 */
+.cmain{max-width:780px;margin:0 auto;display:grid;gap:16px}
+.cmain .head{grid-template-columns:1fr}
+.status-card .sc-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.notice{border-color:var(--rev)}
+.notice h2{font:700 18px/1.4 var(--f-serif);margin-block:6px 12px}
+.notice .n-top{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.notice .acts{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.points-card ul{display:grid;gap:6px;font-size:14px;color:var(--ink-2)}
+.points-card li{display:flex;gap:8px}
+.points-card li::before{content:"·";color:var(--accent);font-weight:700}
+.actions{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:22px}
+
+/* 帳號管理 */
+.accgrid{display:grid;grid-template-columns:minmax(0,400px) minmax(0,1fr);gap:20px;align-items:start}
+.accgrid h2{font:700 18px/1.4 var(--f-serif);margin-bottom:12px}
+.accgrid form{display:grid;gap:14px}
+.accgrid .list+h2{margin-top:22px}
+.acc{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.acc:last-child{border-bottom:0}
+.acc .nm{font-weight:500;overflow-wrap:anywhere}
+.acc .sub{font-size:12.5px;color:var(--ink-2);font-family:var(--f-mono);overflow-wrap:anywhere}
+.hues{display:flex;gap:8px;flex-wrap:wrap}
+.hues label{margin:0;display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:0 12px;border:1px solid var(--line-2);border-radius:99px;font-weight:400;cursor:pointer;background:var(--surface)}
+.hues label:has(input:checked){border-color:var(--accent);background:var(--sunk)}
+.hues .sw{width:14px;height:14px;border-radius:50%}
+
+/* 月曆 */
+.seg-row{margin-bottom:12px}
+.seg{display:inline-flex;border:1px solid var(--line-2);border-radius:10px;overflow:hidden;background:var(--surface)}
+.seg button{min-height:40px;padding:0 18px;border:0;background:transparent;cursor:pointer;font-weight:500;font-size:14.5px}
+.seg button+button{border-left:1px solid var(--line-2)}
+.seg button[aria-pressed=true]{background:var(--primary);color:var(--on-primary)}
+.cal{padding:16px;margin-bottom:16px}
+.cal-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.cal-nav{display:flex;align-items:center;gap:8px}
+.cal-nav h2{font:700 20px/1.3 var(--f-serif);min-width:7.5em;text-align:center}
+.cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border-top:1px solid var(--line);border-left:1px solid var(--line);border-radius:6px;overflow:hidden}
+.cal-dow{padding:6px 0;text-align:center;font-size:12.5px;color:var(--ink-2);border-right:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--sunk)}
+.cal-cell{min-height:108px;padding:4px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:3px;min-width:0}
+.cal-cell.wk{background:var(--sunk)}
+.cal-cell.out{opacity:.55}
+.cal-cell.sel{box-shadow:inset 0 0 0 2px var(--accent)}
+.cal-day{align-self:flex-start;min-width:28px;min-height:28px;border-radius:99px;border:0;background:transparent;cursor:pointer;font:500 13px var(--f-mono);color:var(--ink)}
+.cal-cell.today .cal-day{background:var(--primary);color:var(--on-primary)}
+.cal-items{display:flex;flex-direction:column;gap:3px;min-width:0}
+.cchip{display:flex;align-items:center;gap:4px;width:100%;min-width:0;border:0;border-radius:5px;padding:1px 6px;font-size:12px;line-height:1.55;cursor:pointer;text-align:left;overflow:hidden;white-space:nowrap}
+.cchip .t{overflow:hidden;text-overflow:ellipsis}
+.cchip .ty{font-size:10.5px;opacity:.85;flex:none}
+.cchip.story{outline:1px dashed currentColor;outline-offset:-1px}
+.cchip.dl{background:var(--bad-bg);color:var(--bad);cursor:default}
+.cmore{font-size:12px;color:var(--ink-2);background:none;border:0;cursor:pointer;text-align:left;padding:0 6px;min-height:20px}
+.cal-panel{margin-bottom:16px}
+.cal-panel h3{font:700 16px/1.4 var(--f-serif);margin-bottom:6px}
+.crow{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;width:100%;text-align:left;padding:10px 0;border:0;border-bottom:1px solid var(--line);background:transparent;cursor:pointer;min-height:56px}
+li:last-child>.crow,li.crow:last-child{border-bottom:0}
+li.crow{cursor:default}
+.ty-demo{display:inline-block;min-width:20px;text-align:center;font-size:11px;padding:0 4px;border-radius:4px;background:var(--warn-bg);color:var(--warn)}
+.ty-demo.dash{outline:1px dashed currentColor;outline-offset:-1px}
+.ty-demo.dl{background:var(--bad-bg);color:var(--bad)}
+
+/* 結案數據 */
+.ch{font:700 17px/1.4 var(--f-serif)}
+.ctag{display:inline-block;font-size:12px;font-weight:500;padding:1px 8px;border-radius:99px;white-space:nowrap}
+.ctag.c-wait{background:var(--none-bg);color:var(--none)}
+.ctag.c-submitted{background:var(--warn-bg);color:var(--warn)}
+.ctag.c-returned{background:var(--rev-bg);color:var(--rev)}
+.ctag.c-closed{background:var(--ok-bg);color:var(--ok)}
+.ctag.late{background:var(--bad-bg);color:var(--bad)}
+.r-side .ctag{font-size:11.5px}
+.cblock{border:1px solid var(--line);border-radius:12px;padding:16px;margin:0 0 14px;min-width:0}
+.cblock legend{font-weight:700;padding:0 6px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.mblock{padding:14px 0;border-top:1px dashed var(--line)}
+.mblock:first-of-type{border-top:0;padding-top:0}
+.mblock h4{margin:0 0 8px;font-size:14.5px;font-weight:700}
+.meta.m3{grid-template-columns:repeat(3,minmax(0,1fr));margin-bottom:10px}
+.shot{display:flex;flex-direction:column;gap:6px;min-width:0}
+.shot .btn{align-self:flex-start}
+.cchip.met{background:var(--info-bg);color:var(--info)}
+.cchip.met.late{background:var(--bad-bg);color:var(--bad)}
+.cchip.pay{background:var(--ok-bg);color:var(--ok)}
+.ty-demo.met{background:var(--info-bg);color:var(--info)}
+.ty-demo.pay{background:var(--ok-bg);color:var(--ok)}
+
+/* 合作條款 */
+.clauses{display:grid;gap:8px;margin-top:8px}
+.clause{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--sunk);font-size:14.5px;font-weight:400;margin:0;line-height:1.6;justify-content:flex-start}
+label.clause{cursor:pointer}
+label.clause:has(input:checked){border-color:var(--ok);background:var(--ok-bg)}
+.clause b{font-weight:700}
+.ctsec p{overflow-wrap:anywhere}
+
+/* 匯出 */
+.dash-act{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.dash-btns{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.aud{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:8px 10px;align-items:baseline;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
+.aud:last-child{border-bottom:0}
+.slot .btn.sm{align-self:flex-start}
+@media (max-width:560px){.dash-act{align-items:stretch;width:100%}.dash-btns{justify-content:stretch}.dash-btns .btn{flex:1}}
+
+/* 審稿員等級 */
+.lv{display:inline-block;font:500 11px/1.6 var(--f-mono);padding:0 6px;border-radius:5px;border:1px solid var(--line-2);color:var(--ink-2);vertical-align:1px}
+.lv.max{border-color:var(--accent);color:var(--accent)}
+.lvrow{display:flex;align-items:center;gap:8px;margin-top:6px;flex-wrap:wrap}
+.lvrow select{width:auto;min-height:36px;padding:4px 10px;font-size:13.5px}
+
+/* 匯款與證件 */
+.slots{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.slot{display:flex;flex-direction:column;gap:8px;min-width:0;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--sunk)}
+.slot .lbl{margin:0;font-size:13px}
+.slot .ph{display:grid;place-items:center;height:120px;border-radius:6px;background:var(--line);color:var(--ink-2);font-size:13px}
+.pthumb{width:100%;height:120px;object-fit:cover;border-radius:6px;background:var(--line);display:block;color:var(--ink-2);font-size:12px}
+.pthumb.big{height:auto;max-height:70vh;object-fit:contain}
+.pthumb[data-act]{cursor:zoom-in}
+.pthumb.big[data-act]{cursor:zoom-out}
+.slot input[type=file]{font-size:13px;min-height:40px}
+.paysec .meta{margin-bottom:16px}
+
+/* 開立交稿頁 */
+.dash-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.dash-head h2{font:700 20px/1.4 var(--f-serif)}
+.dash-head p{font-size:13.5px;color:var(--ink-2)}
+.st-unopened{color:var(--ink-2);background:transparent;border:1px dashed var(--line-2)}
+.warnline{margin-top:8px;padding:8px 12px;border-radius:8px;background:var(--warn-bg);color:var(--warn);font-size:13.5px}
+.tag.req{border-color:var(--accent);background:var(--sunk)}
+.tag.miss{border-color:var(--warn);color:var(--warn);background:var(--warn-bg)}
+.bsum .meta{margin-bottom:0}
+.bform{max-width:720px}
+.bform h1{font:700 24px/1.3 var(--f-serif);margin-bottom:6px}
+.bform form{display:grid;gap:18px;margin-top:20px}
+.bform .sec{display:grid;gap:16px;padding-top:18px;border-top:1px solid var(--line)}
+.bform .sec>h2{font:700 16px/1.4 var(--f-serif)}
+.briefcard h2{font:700 17px/1.4 var(--f-serif);margin-bottom:12px}
+.briefcard .meta{margin-bottom:0}
+
+/* 登入 */
+.login{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,440px);gap:40px;align-items:center;min-height:min(640px,80vh);padding-block:24px}
+.login-intro h1{font:700 34px/1.3 var(--f-serif);margin-block:8px 14px}
+.login-intro .lead{max-width:44ch;color:var(--ink-2);font-size:16px}
+.who-list{display:grid;gap:14px;margin-top:26px;max-width:46ch}
+.who-list li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px}
+.who-list .seal{width:34px;height:34px;font-size:16px}
+.who-list b{display:block;font-weight:500}
+.who-list span{color:var(--ink-2);font-size:14px}
+.login-card{padding:24px}
+.login-card h2{font:700 20px var(--f-serif);margin-bottom:16px}
+.login-card form{display:grid;gap:14px}
+.demo{margin-top:22px;padding-top:18px;border-top:1px solid var(--line)}
+.demo h3{font-size:14px;font-weight:500;margin-bottom:2px}
+.demo ul{margin-top:10px}
+.demo li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line)}
+.demo li:last-child{border-bottom:0}
+.demo .d-name{font-size:14px;line-height:1.35}
+.demo .d-cred{font:12.5px var(--f-mono);color:var(--ink-2);overflow-wrap:anywhere}
+.foot{margin-top:28px;font-size:12.5px;color:var(--ink-2);text-align:center}
+
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);max-width:min(92vw,420px);
+  padding:11px 18px;border-radius:10px;background:var(--primary);color:var(--on-primary);font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:50}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.toast.err{background:var(--bad);color:#fff}
+
+/* 美化層：排版、陰影、頭像、待辦摘要、稿紙邊線 */
+body{background-image:radial-gradient(1100px 380px at 50% -140px,var(--accent-soft),transparent 72%);background-repeat:no-repeat}
+:focus-visible{outline:none;box-shadow:0 0 0 2px var(--surface),0 0 0 4px var(--accent)}
+.top{position:sticky;top:calc(env(safe-area-inset-top,0px) + 8px);z-index:20;margin-bottom:18px;padding:10px 14px;background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow)}
+@supports (background:color-mix(in srgb,red,blue)){
+  .top{background:color-mix(in srgb,var(--surface) 90%,transparent);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+}
+.seal{border-radius:10px;transform:rotate(-4deg);box-shadow:inset 0 0 0 2px var(--primary),inset 0 0 0 3.5px var(--on-primary)}
+.brand-name{font-size:18px;letter-spacing:.02em}
+.av{display:block;width:40px;height:40px;border-radius:32%;background:none;font-size:0}
+.av.lg{width:56px;height:56px}
+.me .av{width:34px;height:34px}
+.av .avbg{fill:hsl(var(--h) 55% var(--av-bg))}
+.card{border-radius:16px}
+.banner{border-radius:12px}
+.btn{border-radius:12px;transition:background .15s,border-color .15s,transform .06s}
+.btn:hover:not(:disabled){background:var(--sunk);border-color:var(--ink-2)}
+.btn.primary:hover:not(:disabled){background:var(--primary);filter:brightness(1.14)}
+.btn.ghost:hover:not(:disabled){background:var(--sunk);border-color:transparent}
+.btn:active:not(:disabled){transform:translateY(1px)}
+input,select,textarea{border-radius:10px;transition:border-color .15s,box-shadow .15s}
+input:hover,select:hover,textarea:hover{border-color:var(--ink-2)}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--ring)}
+select{-webkit-appearance:none;appearance:none;padding-right:36px;background-repeat:no-repeat;background-position:right 12px center;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%238794AB' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")}
+.chip{transition:border-color .15s,background .15s}
+.chip:hover{border-color:var(--ink-2)}
+.pill{padding:3px 11px;font-size:12.5px;letter-spacing:.02em}
+.tools h3,.tool h3,.rv h3,.hist h3,.points-card h3,.cal-panel h3,.ch{font:700 16px/1.4 var(--f-serif);letter-spacing:.02em}
+
+/* 待辦摘要 */
+.tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:16px}
+.tile{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:14px 16px;border:1px solid var(--line);border-radius:16px;background:var(--surface);box-shadow:var(--shadow);cursor:pointer;text-align:left;min-width:0;transition:border-color .15s,transform .1s}
+.tile:hover:not(:disabled){border-color:var(--accent);transform:translateY(-1px)}
+.tile .t-l{font-size:12.5px;color:var(--ink-2);font-weight:500}
+.tile .t-n{font:500 32px/1.15 var(--f-mono)}
+.tile .t-s{font-size:12.5px;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.tile.zero{background:transparent;box-shadow:none;cursor:default;border-style:dashed}
+.tile.zero .t-n{color:var(--line-2)}
+.tile:nth-child(1):not(.zero) .t-n{color:var(--warn)}
+.tile:nth-child(2):not(.zero) .t-n{color:var(--rev)}
+.tile:nth-child(3):not(.zero) .t-n{color:var(--info)}
+.tile:nth-child(4):not(.zero) .t-n{color:var(--ok)}
+
+/* 標題區與名單 */
+.head h1{font-size:30px;letter-spacing:.01em}
+.dl{background:linear-gradient(180deg,var(--surface),var(--sunk))}
+.row{padding:14px 16px;transition:background .15s}
+.row[aria-current=true]{background:var(--accent-soft)}
+.pane-detail>.dhead{background:linear-gradient(180deg,var(--sunk),transparent);border-radius:16px 16px 0 0}
+.dwho h2{font-size:22px}
+
+/* 稿紙：橫線加上左側紅色邊線 */
+.paper{padding:0 16px 0 52px;border-radius:10px;
+  background-image:linear-gradient(to right,transparent 38px,var(--margin) 38px,var(--margin) 39px,transparent 39px),repeating-linear-gradient(to bottom,transparent 0,transparent 27px,var(--line) 27px,var(--line) 28px)}
+
+/* 時間軸 */
+.tl li{position:relative}
+.tl li:not(:last-child)::after{content:"";position:absolute;left:4.5px;top:20px;bottom:-14px;width:1px;background:var(--line)}
+.tl .dot{box-shadow:0 0 0 3px var(--surface)}
+
+/* 月曆 */
+.cal{padding:20px}
+.cal-grid{border-radius:12px}
+.cal-nav h2{font-size:22px}
+.cal-cell{transition:background .15s}
+.cal-cell:hover{background:var(--sunk)}
+.cal-cell.today .cal-day{background:var(--accent);color:var(--on-primary)}
+.cchip{border-radius:6px;padding:2px 7px}
+
+/* 登入 */
+.login-intro h1{font-size:38px}
+.login-card{box-shadow:var(--shadow2);border-radius:20px;padding:28px}
+.sample{margin-top:26px;max-width:46ch;padding:16px;border:1px solid var(--line);border-radius:16px;background:var(--surface);box-shadow:var(--shadow2);transform:rotate(-1.2deg)}
+.sample-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.sample .paper{min-height:0;font-size:14.5px}
+.who-list{display:grid;gap:10px;margin-top:26px;max-width:46ch}
+.who-list li{display:block;color:var(--ink-2);font-size:14px}
+.who-list b{display:inline;margin-right:8px;color:var(--ink)}
+.toast{border-radius:12px}
+
+@media (max-width:860px){
+  .head{grid-template-columns:1fr}
+  .split{grid-template-columns:minmax(0,1fr)}
+  .split[data-view=list] .pane-detail{display:none}
+  .split[data-view=detail] .pane-list{display:none}
+  .only-m{display:inline-flex}
+  .login{grid-template-columns:minmax(0,1fr);gap:24px;min-height:0}
+  .login-intro h1{font-size:28px}
+  .head h1{font-size:23px}
+  .accgrid{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:560px){
+  .top{position:static}
+  .tiles{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .tile .t-n{font-size:26px}
+  .sample{transform:none}
+  .head h1{font-size:25px}
+  .login-intro h1{font-size:30px}
+  .cal{padding:10px}
+  .cal-cell{min-height:54px;padding:2px}
+  .cal-items{flex-direction:row;flex-wrap:wrap;gap:3px;padding-left:3px}
+  .cchip{width:9px;height:9px;padding:0;border-radius:50%;background:currentColor;font-size:0;outline:0}
+  .cchip .t,.cchip .ty{display:none}
+  .cchip.story{outline:0;border-radius:2px}
+  .cchip.dl,.cchip.met,.cchip.pay{background:currentColor}
+  .cchip.dl{background:var(--bad)}
+  .cmore{display:none}
+  .grid3,.meta.m3{grid-template-columns:minmax(0,1fr)}
+  .cal-nav h2{min-width:6em;font-size:18px}
+  .grid2,.meta{grid-template-columns:minmax(0,1fr)}
+  .slots{grid-template-columns:minmax(0,1fr)}
+  .decide{grid-template-columns:minmax(0,1fr)}
+  .pad,.pane-detail>section,.pane-detail>div{padding:16px}
+  .me-t{display:none}
+  .prog-bar{width:80px}
+  .mats{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+
+</head>
+<body>
+<div id="app" lang="zh-Hant"><div class="boot">連線中…</div></div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+'use strict';
+var TZ='Asia/Taipei';
+
+/*SEED-START*/
+var HOUR=3600e3, DAY=24*HOUR;
+/* 簡易合作條款。這是示範版本，不能取代正式合約。條款內容改了就要調高 version，人選會被要求重新確認。 */
+var CONTRACT={version:'1.1',name:'簡易合作條款'};
+function contractClauses(c){
+  return [
+    {n:1,title:'合作內容',text:'人選依「合作設定」為'+c.brand+'製作並發布內容。發布平台：'+c.platforms+'；必要標籤：'+c.tags+'。'},
+    {n:2,title:'稿件編修與確認',text:'品牌方的審稿員得直接編修稿件，並通知人選查看。編修後的稿件需經人選確認才進入定稿；人選在截稿前也可以再自行修改。'},
+    {n:3,title:'交稿期限',text:'稿件需在 '+c.deadline+' 前上傳。逾期未交稿，視為放棄本次合作，品牌方得另行安排。'},
+    {n:4,title:'費用與付款',text:'人選合作費用為新台幣 '+c.fee+' 元（未稅）。稿件定稿、依約發布並完成結案確認後，品牌方於發布日起 '+c.payDays+' 天內，匯入人選提供的帳戶。稅款依法令規定辦理扣繳與申報。'},
+    {n:5,title:'結案數據',text:'人選須在合作曝光後 14 日內，上傳各曝光平台後台的數據截圖，並填寫貼文與 IG 限動的瀏覽次數、互動次數與互動帳號。數據經審稿員確認無誤即為結案，付款以結案確認為前提。'},
+    {n:6,title:'合作揭露與法令遵循',text:'發布內容須清楚標示合作關係（如 #合作 或 #廣告），不得有未經核准的功效或療效宣稱，也不得比較或貶低競品。'},
+    {n:7,title:'原創與授權',text:'人選保證內容為原創，或已取得合法授權，不侵害第三人權利。人選同意品牌方在本次合作相關的官方通路，轉載或引用已定稿的內容，期間為發布日起 12 個月。'},
+    {n:8,title:'保密',text:'合作費用與合作條件屬於保密資訊，除法令要求外，不得對外揭露。'},
+    {n:9,title:'個人資料',text:'人選提供的匯款資料與證件影本，只用於付款與稅務申報，僅限被授權的審稿員查閱，不作其他用途。'},
+    {n:10,title:'變更與終止',text:'合作內容或費用有變更時，人選需重新確認。任一方有重大違約，他方得書面通知終止合作。'}
+  ];
+}
+function demoSeed(now){
+  var ago=function(ms){return new Date(now-ms).toISOString();};
+  var R=function(t,u){return {t:t,u:u};};
+  var dl=new Date(now+7*DAY); dl.setUTCHours(10,0,0,0);
+  var campaign={
+    name:'晨嵐咖啡「秋收」系列合作',
+    brand:'晨嵐咖啡',
+    brief:'秋季新品「秋收」手沖濾掛系列，邀請多位自媒體人選用自己的風格供稿。發布檔期為 10/20 至 11/03，稿件請在截稿前上傳，審稿員會直接編修並通知你確認。',
+    deadline:dl.toISOString()
+  };
+  var accounts={
+    editor:{id:'editor',name:'林主編',role:'reviewer',level:5,pw:'review2026',hue:215,demo:true},
+    editor2:{id:'editor2',name:'王編輯',role:'reviewer',level:1,pw:'editor2026',hue:330,demo:true},
+    mina:{id:'mina',name:'小米的日常',role:'creator',platform:'Instagram',fans:'12.8 萬',pw:'mina2026',hue:200,demo:true},
+    kai:{id:'kai',name:'阿凱愛露營',role:'creator',platform:'YouTube',fans:'8.4 萬',pw:'kai2026',hue:150,demo:true},
+    xun:{id:'xun',name:'林小薰',role:'creator',platform:'Threads',fans:'5.1 萬',pw:'xun2026',hue:275,demo:true},
+    zhou:{id:'zhou',name:'吃貨老周',role:'creator',platform:'部落格',fans:'3.6 萬',pw:'zhou2026',hue:28,demo:true},
+    yuki:{id:'yuki',name:'週末花店 Yuki',role:'creator',platform:'Instagram',fans:'2.2 萬',pw:'yuki2026',hue:355,demo:true},
+    ray:{id:'ray',name:'RAY的書桌',role:'creator',platform:'YouTube',fans:'4.9 萬',pw:'ray2026',hue:95,demo:true}
+  };
+  var briefs={
+    mina:{creatorId:'mina',platforms:['Instagram','Threads'],platformOther:'',requiredTags:'#晨嵐咖啡 #秋收系列 #合作',publishDate:'2026-10-22',note:'請在文案最前面標示合作揭露，影片長度控制在 60 秒內。',by:'editor',at:ago(4*DAY)},
+    kai:{creatorId:'kai',platforms:['其他'],platformOther:'YouTube',requiredTags:'#晨嵐咖啡 #合作',publishDate:'2026-10-25',note:'露營情境，建議附三種沖法的比較。',by:'editor',at:ago(5*DAY)},
+    xun:{creatorId:'xun',platforms:['Threads','Instagram'],platformOther:'',requiredTags:'#晨嵐咖啡 #合作',publishDate:'2026-10-21',note:'',by:'editor2',at:ago(3*DAY)},
+    zhou:{creatorId:'zhou',platforms:['Facebook','其他'],platformOther:'部落格',requiredTags:'#晨嵐咖啡 #合作',publishDate:'2026-10-28',note:'',by:'editor2',at:ago(3*DAY)},
+    yuki:{creatorId:'yuki',platforms:['Instagram'],platformOther:'',requiredTags:'#晨嵐咖啡 #秋收系列 #合作',publishDate:'2026-10-24',note:'花藝與咖啡的搭配，限動資訊審稿員稍後會提供。',by:'editor',at:ago(1*DAY)}
+  };
+  var subs={
+    mina:{
+      creatorId:'mina',rev:4,status:'confirming',updatedBy:'editor',submittedAt:ago(3*DAY),updatedAt:ago(5*HOUR),
+      title:[R('通勤十分鐘的手沖：秋收濾掛開箱','mina')],
+      platforms:['Instagram','Threads'],platformOther:'',publishDate:'2026-10-22',
+      materials:[{kind:'link',url:'https://example.com/drive/mina-reels-draft',by:'mina'}],
+      body:[R('本篇為晨嵐咖啡合作內容。\n','editor'),
+        R('早上七點四十分，等電梯的這十分鐘，是我一天裡少數屬於自己的時間。\n這次試了晨嵐「秋收」濾掛：撕開、掛杯、注水，三十秒就聞到烘焙堅果的香氣。\n入口是焦糖和榛果，尾韻有一點乾燥水果的酸，','mina'),
+        R('放涼後甜感會更明顯，','editor2'),
+        R('很適合帶去公司慢慢喝。\n影片裡我會示範用保溫瓶的熱水沖一杯，全程不到兩分鐘。','mina')],
+      tags:[R('#晨嵐咖啡 #秋收系列 #手沖濾掛 #通勤日常','mina'),R(' #合作','editor')],
+      story:{date:'2026-10-22',time:'20:00',
+        caption:[R('下班前的小確幸：','editor'),R('秋收濾掛，撕開就能沖。','editor2')],
+        links:['https://example.com/chenlan/autumn']},
+      fieldBy:{storyDate:'editor',storyTime:'editor',storyLinks:'editor'},
+      reviewerEdits:['body','tags','storyDate','storyTime','storyCaption','storyLinks'],
+      notice:{by:'editor',at:ago(5*HOUR),message:'我補上合作揭露，也排好限動的時間、文案和連結，請看一下。沒問題就按「確認無誤」。',fields:['body','tags','storyDate','storyTime','storyCaption','storyLinks']},
+      review:null,
+      history:[
+        {at:ago(3*DAY),type:'submit',by:'mina',v:1,fields:['title','platforms','publishDate','materials','body','tags']},
+        {at:ago(1.2*DAY),type:'edit',by:'editor',v:2,fields:['body','tags']},
+        {at:ago(1*DAY),type:'edit',by:'editor2',v:3,fields:['body']},
+        {at:ago(6*HOUR),type:'edit',by:'editor',v:4,fields:['storyDate','storyTime','storyCaption','storyLinks']},
+        {at:ago(5*HOUR),type:'notify',by:'editor',v:4,note:'我補上合作揭露，也排好限動的時間、文案和連結，請看一下。沒問題就按「確認無誤」。',fields:['body','tags','storyDate','storyTime','storyCaption','storyLinks']}
+      ]
+    },
+    kai:{
+      creatorId:'kai',rev:3,status:'approved',updatedBy:'editor2',submittedAt:ago(4*DAY),updatedAt:ago(3.4*DAY),
+      title:[R('營地早晨的一杯：秋收濾掛露營實測','kai')],
+      platforms:['其他'],platformOther:'YouTube',publishDate:'2026-10-25',
+      materials:[{kind:'link',url:'https://example.com/drive/kai-camping-cut',by:'kai'}],
+      body:[R('露營最怕早上起來手腳冰冷，還要洗一堆器具。濾掛剛好解決這件事：一個杯子、一壺熱水，就能在帳篷前喝到像樣的咖啡。\n這次我在海拔 1,200 公尺的營地實測，風有點大，水溫掉得快，所以先用熱水把杯子溫過再沖。香氣還是很穩，喝起來有可可和烤杏仁的味道，甜感乾淨。\n片尾附上我的露營早晨清單，以及三種沖法的比較。\n#合作 晨嵐咖啡提供產品試用。','kai')],
+      tags:[R('#晨嵐咖啡 #秋收系列 #露營咖啡 #合作','kai')],
+      story:{date:'2026-10-25',time:'12:00',caption:[R('露營早晨的第一杯，新片今天上線。','editor2')],links:['https://example.com/yt/kai-camping']},
+      fieldBy:{storyDate:'editor2',storyTime:'editor2',storyLinks:'editor2'},
+      reviewerEdits:[],notice:null,
+      review:{checks:[true,true,true,true,true,true],by:'editor',at:ago(3*DAY),rev:3},
+      history:[
+        {at:ago(4*DAY),type:'submit',by:'kai',v:1,fields:['title','platforms','publishDate','materials','body','tags']},
+        {at:ago(3.4*DAY),type:'edit',by:'editor2',v:3,fields:['storyDate','storyTime','storyCaption','storyLinks']},
+        {at:ago(3*DAY),type:'approved',by:'editor',v:3,note:'內容和限動資訊都確認了，定稿。'}
+      ]
+    },
+    xun:{
+      creatorId:'xun',rev:1,status:'pending',updatedBy:'xun',submittedAt:ago(2*DAY),updatedAt:ago(2*DAY),
+      title:[R('三種水溫，三種秋天','xun')],
+      platforms:['Threads','Instagram'],platformOther:'',publishDate:'2026-10-21',
+      materials:[],
+      body:[R('同一包秋收濾掛，我用 85、90、95 度各沖一次。\n85 度：柔和，像剛烤好的栗子。\n90 度：最平衡，焦糖感明顯。\n95 度：偏厚實，帶一點深焙的苦甜。\n而且喝完整個人精神百倍，抗疲勞效果很明顯，熬夜趕稿的朋友一定要試試。\n#合作 #晨嵐咖啡','xun')],
+      tags:[R('#晨嵐咖啡 #秋收系列 #手沖 #合作','xun')],
+      story:{date:'',time:'',caption:[],links:[]},
+      fieldBy:{},reviewerEdits:[],notice:null,review:null,
+      history:[{at:ago(2*DAY),type:'submit',by:'xun',v:1,fields:['title','platforms','publishDate','body','tags']}]
+    },
+    zhou:{
+      creatorId:'zhou',rev:3,status:'confirmed',updatedBy:'editor2',submittedAt:ago(2*DAY),updatedAt:ago(1.4*DAY),
+      title:[R('秋收濾掛三週試喝筆記','zhou')],
+      platforms:['Facebook','其他'],platformOther:'部落格',publishDate:'2026-10-28',
+      materials:[{kind:'link',url:'https://example.com/blog/zhou-notes',by:'zhou'}],
+      body:[R('連續三個禮拜，我每天早上沖一包晨嵐秋收，記下水溫、時間和風味。\n第一週最明顯的是焦糖和烘焙堅果，第二週開始喝得出尾韻的乾燥水果酸，第三週甜感最穩定。\n整理出我自己的沖法：90 度水溫、先悶蒸三十秒，再分兩次注水。\n','zhou'),R('完整試喝紀錄放在文末。','editor2')],
+      tags:[R('#晨嵐咖啡 #濾掛咖啡','zhou'),R(' #合作','editor2')],
+      story:{date:'',time:'',caption:[],links:[]},
+      fieldBy:{},reviewerEdits:[],notice:null,review:null,
+      history:[
+        {at:ago(2*DAY),type:'submit',by:'zhou',v:1,fields:['title','platforms','publishDate','materials','body','tags']},
+        {at:ago(1.6*DAY),type:'edit',by:'editor2',v:2,fields:['body','tags']},
+        {at:ago(1.5*DAY),type:'notify',by:'editor2',v:2,note:'拿掉了「最划算」的說法，並補上合作標籤，請確認。',fields:['body','tags']},
+        {at:ago(1.4*DAY),type:'confirm',by:'zhou',v:2}
+      ]
+    }
+  };
+  var svg=function(t){
+    return 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="480" height="300" viewBox="0 0 480 300"><rect width="480" height="300" fill="#e8ecf2"/><rect x="16" y="16" width="448" height="268" rx="14" fill="none" stroke="#8a96aa" stroke-width="3" stroke-dasharray="10 8"/><text x="240" y="146" font-size="28" text-anchor="middle" fill="#3b4760" font-family="sans-serif">'+t+'</text><text x="240" y="186" font-size="16" text-anchor="middle" fill="#6b778c" font-family="sans-serif">DEMO ONLY</text></svg>');
+  };
+  var payForms={},payFiles={};
+  [['mina','台灣銀行（示範）','004','000012345601',3.5*DAY],['kai','玉山銀行（示範）','808','000098765402',4*DAY],
+   ['xun','中華郵政（示範）','700','000011122303',2*DAY],['zhou','國泰世華（示範）','013','000044455504',2*DAY]].forEach(function(x){
+    var c=x[0],at=ago(x[4]),F=function(n,label){
+      payFiles['demo-'+c+'-'+n]={name:label+'（示範）.jpg',type:'image/svg+xml',data:svg('示範：'+label)};
+      return {fid:'demo-'+c+'-'+n,name:label+'（示範）.jpg',size:1};
+    };
+    payForms[c]={creatorId:c,uid:'demo',bankName:x[1],bankCode:x[2],bankAccount:x[3],
+      files:{idFront:F(1,'身分證正面'),idBack:F(2,'身分證反面'),bankbook:F(3,'銀行帳號影本')},at:at};
+    subs[c].pay={uid:'demo',at:at,bankName:x[1],bankCode:x[2],last4:x[3].slice(-4),complete:true};
+  });
+  var cfees={},bfees={},contracts={};
+  [['mina',12000,20000],['kai',18000,30000],['xun',6000,10000],['zhou',9000,15000],['yuki',8000,14000]].forEach(function(x){
+    cfees[x[0]]={creatorId:x[0],creatorFee:x[1],payDays:30,rev:1,by:'editor',at:ago(5*DAY)};
+    bfees[x[0]]={creatorId:x[0],brandFee:x[2],by:'editor',at:ago(5*DAY)};
+  });
+  ['mina','kai','xun','zhou'].forEach(function(c){
+    var at=ago(c==='kai'?3.9*DAY:2.5*DAY),b=briefs[c],p=[];
+    (b.platforms||[]).forEach(function(n){p.push(n==='其他'&&b.platformOther?b.platformOther:n);});
+    var dlText;
+    try{dlText=new Date(campaign.deadline).toLocaleString('zh-TW',{timeZone:'Asia/Taipei',hour12:false,year:'numeric',month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'});}catch(e){dlText=campaign.deadline;}
+    var cl=contractClauses({brand:campaign.brand,platforms:p.join('、'),tags:b.requiredTags||'無指定',deadline:dlText,fee:String(cfees[c].creatorFee).replace(/\B(?=(\d{3})+(?!\d))/g,','),payDays:cfees[c].payDays});
+    contracts[c]={creatorId:c,uid:'demo',version:CONTRACT.version,at:at,creatorFee:cfees[c].creatorFee,payDays:cfees[c].payDays,feeRev:1,agreed:cl.map(function(x){return x.n;}),clauses:cl};
+    subs[c].contract={version:CONTRACT.version,at:at,uid:'demo',feeRev:1,payDays:30};
+  });
+  var files={};
+  var shot=function(fid,label){
+    files[fid]={name:label+'（示範）.png',type:'image/svg+xml',data:svg('示範：'+label)};
+    return {kind:'file',fid:fid,name:label+'（示範）.png',type:'image/svg+xml',size:1,by:'kai'};
+  };
+  subs.kai.close={
+    status:'submitted',submittedAt:ago(5*HOUR),submittedBy:'kai',due:'2026-11-08',late:false,review:null,paid:null,
+    blocks:{
+      '其他':{views:15200,inter:1230,accounts:980,note:'YouTube 影片上線後的觀看與互動數據（示範）。',shots:[shot('demo-kai-shot1','YouTube 後台數據')]},
+      story:{views:8400,inter:310,accounts:290,note:'',shots:[shot('demo-kai-shot2','IG 限動洞察')]}
+    }
+  };
+  subs.kai.history.push({at:ago(5*HOUR),type:'closeSubmit',by:'kai',v:subs.kai.rev});
+  return {campaign:campaign,accounts:accounts,briefs:briefs,subs:subs,files:files,pay:{uid:'demo',forms:payForms,files:payFiles,contracts:contracts},fees:{creator:cfees,brand:bfees}};
+}
+/*SEED-END*/
+
+var ST={unopened:'待開立',none:'未上傳',pending:'待審',confirming:'待人選確認',confirmed:'人選已確認',approved:'已定稿'};
+var GL={unopened:'＋',none:'○',pending:'◔',confirming:'✎',confirmed:'◕',approved:'✓'};
+var PRIORITY={pending:0,confirmed:1,unopened:2,confirming:3,none:4,approved:5};
+var EVT={submit:'送出稿件',update:'更新稿件',edit:'編修稿件',notify:'通知人選確認',confirm:'人選確認無誤',approved:'定稿',reopen:'改回待審',
+  closeSubmit:'上傳結案數據',closeReturn:'結案數據退回補件',closeDone:'結案確認',paid:'標記已付款',unpaid:'撤銷付款標記'};
+var CL={wait:'待上傳數據',submitted:'數據待確認',returned:'數據需補件',closed:'已結案'};
+var METRIC_HINT={
+  Instagram:{views:'貼文洞察的「瀏覽次數」',inter:'按讚、留言、分享、儲存的加總',accounts:'洞察的「互動帳號」數'},
+  Facebook:{views:'貼文洞察的「瀏覽次數」',inter:'心情、留言、分享的加總',accounts:'互動的人數'},
+  Threads:{views:'貼文洞察的「瀏覽」',inter:'讚、回覆、轉發、引用的加總',accounts:'互動的帳號數'},
+  '其他':{views:'該平台後台的瀏覽或觀看次數',inter:'該平台後台的互動加總',accounts:'互動的帳號或人數'},
+  story:{views:'限動洞察的「瀏覽次數」',inter:'回覆、分享、貼紙點擊（含連結點擊）的加總',accounts:'互動的帳號數'}
+};
+var FLD={contract:'合作條款確認',pay:'匯款資料',title:'標題',platforms:'發布平台',publishDate:'預計發布日',materials:'素材',body:'文案',tags:'標籤',storyDate:'限動日期',storyTime:'限動時間',storyCaption:'限動文案',storyLinks:'限動連結'};
+var CHECKS=[
+  '品牌與產品名稱正確（晨嵐咖啡「秋收」系列）',
+  '已標示合作揭露（#合作 或 #廣告）',
+  '沒有未經核准的功效或療效宣稱',
+  '素材可以開啟（連結或上傳檔案）',
+  '預計發布日在檔期內（10/20 – 11/03）',
+  '語氣符合品牌調性，沒有比較或貶低競品'
+];
+var PLATFORMS=['Instagram','Facebook','Threads','其他'];
+/* 審稿員安全等級：1 到 5，5 就是 LV（最高級）。L2 到 L4 先保留，之後只要改這兩張表就能開放。 */
+var LEVELS=[{n:1,label:'L1'},{n:2,label:'L2',reserved:true},{n:3,label:'L3',reserved:true},{n:4,label:'L4',reserved:true},{n:5,label:'LV'}];
+var NEED={editContent:1,openCreator:1,adjustDeadline:1,viewPay:5,exportPay:5,viewCreatorFee:5,viewBrandFee:1,editFees:5,confirmClose:1,markPaid:5,manageAccounts:5,resetDemo:5};
+var PAYFILES=[['idFront','身分證正面影本'],['idBack','身分證反面影本'],['bankbook','銀行帳號影本（存摺封面）']];
+var payCache={},payLoading={};
+var HUES=[{h:215,n:'藍'},{h:330,n:'洋紅'},{h:25,n:'橘'},{h:150,n:'綠'},{h:270,n:'紫'},{h:185,n:'青'},{h:0,n:'紅'}];
+var SK='ksp-user';
+
+var state={
+  userId:null,mode:'init',loaded:false,loadErr:false,
+  campaign:null,subs:{},briefs:{},cfees:{},bfees:{},accounts:[],canWrite:null,assets:null,dl:null,audit:null,uid:null,payView:{},
+  view:'main',dash:'cal',calY:null,calM:0,calSel:null,filter:'all',q:'',sel:null,mobileDetail:false,
+  brief:{target:null,f:null},
+  draft:null,draftId:null,draftRev:-1,draftBriefAt:'',dirty:false,editing:null,errors:[],uploading:0,
+  cdraft:null,cmsg:{},cerr:'',
+  review:{},msg:{},reviewErr:'',busy:false,resetArm:false,delArm:null,dlOpen:false,
+  accForm:{role:'reviewer',name:'',id:'',pw:'',hue:null,level:1,platform:'Instagram',err:''},
+  loginId:'',loginPw:'',loginErr:''
+};
+var api=null,composing=false,pendingRender=false,rt=0,tt=0,lastClosed=null;
+var fileCache={},fileLoading={};
+var DEFAULTS=Object.keys(demoSeed(0).accounts).map(function(k){return demoSeed(0).accounts[k];});
+
+function $(s){return document.querySelector(s);}
+function clone(o){return o==null?o:JSON.parse(JSON.stringify(o));}
+function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function wc(t){return Array.from(String(t||'').replace(/\s/g,'')).length;}
+function safeLink(u){return /^https?:\/\/\S+$/i.test(u||'');}
+function readOnly(){return state.canWrite===false;}
+
+/* ---------- 帳號 ---------- */
+function accounts(){return state.accounts.length?state.accounts:DEFAULTS;}
+function acc(id){return accounts().filter(function(a){return a.id===id;})[0]||null;}
+function me(){return state.userId?acc(state.userId):null;}
+function creators(){return accounts().filter(function(a){return a.role==='creator';});}
+function reviewers(){return accounts().filter(function(a){return a.role==='reviewer';});}
+function nameOf(id){var a=acc(id);return a?a.name:'（已移除）';}
+function isRev(a){return !!a&&a.role==='reviewer';}
+function levelOf(a){return a&&a.level?+a.level:5;}
+function levelLabel(n){var l=LEVELS.filter(function(x){return x.n===+n;})[0];return l?l.label:'L'+n;}
+function allow(cap){var a=me();return isRev(a)&&levelOf(a)>=(NEED[cap]||99);}
+function lvBadge(a){return isRev(a)?'<span class="lv'+(levelOf(a)>=5?' max':'')+'">'+esc(levelLabel(levelOf(a)))+'</span>':'';}
+function levelOpts(sel){
+  return LEVELS.map(function(l){
+    return '<option value="'+l.n+'"'+(l.n===+sel?' selected':'')+(l.reserved?' disabled':'')+'>'+l.label+(l.reserved?'（預留）':(l.n===5?'（最高級）':''))+'</option>';
+  }).join('');
+}
+function colorAttr(id){var a=acc(id);return isRev(a)?' class="ru" style="--h:'+a.hue+'"':'';}
+function nameTag(id){var a=acc(id);return isRev(a)?'<span class="ru by" style="--h:'+a.hue+'">'+esc(a.name)+'</span>':'<b style="font-weight:500">'+esc(nameOf(id))+'</b>';}
+
+/* ---------- 日期 ---------- */
+var dfShort=new Intl.DateTimeFormat('zh-TW',{timeZone:TZ,month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:false});
+var dfFull=new Intl.DateTimeFormat('zh-TW',{timeZone:TZ,year:'numeric',month:'numeric',day:'numeric',weekday:'short',hour:'2-digit',minute:'2-digit',hour12:false});
+var dfInput=new Intl.DateTimeFormat('sv-SE',{timeZone:TZ,year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false});
+var dfDay=new Intl.DateTimeFormat('sv-SE',{timeZone:TZ,year:'numeric',month:'2-digit',day:'2-digit'});
+var dfDayLabel=new Intl.DateTimeFormat('zh-TW',{timeZone:TZ,month:'numeric',day:'numeric',weekday:'short'});
+var dfDayFull=new Intl.DateTimeFormat('zh-TW',{timeZone:TZ,year:'numeric',month:'numeric',day:'numeric',weekday:'short'});
+function fmt(iso){try{return dfShort.format(new Date(iso));}catch(e){return '';}}
+function fmtFull(iso){try{return dfFull.format(new Date(iso));}catch(e){return '';}}
+function toInput(iso){try{return dfInput.format(new Date(iso)).replace(' ','T');}catch(e){return '';}}
+function dayDate(v){return new Date(v+'T12:00:00+08:00');}
+function fmtDay(v){if(!v)return '未設定';try{return dfDayFull.format(dayDate(v));}catch(e){return v;}}
+function dateOpts(sel){
+  var vals={};
+  for(var i=0;i<=90;i++)vals[dfDay.format(Date.now()+i*DAY)]=1;
+  if(sel)vals[sel]=1;
+  var h='<option value="">請選擇日期</option>';
+  Object.keys(vals).sort().forEach(function(v){
+    var lb;try{lb=dfDayLabel.format(dayDate(v));}catch(e){lb=v;}
+    h+='<option value="'+esc(v)+'"'+(v===sel?' selected':'')+'>'+esc(lb)+'</option>';
+  });
+  return h;
+}
+function timeOpts(sel){
+  var h='<option value="">請選擇時間</option>';
+  for(var i=0;i<24;i++){var t=(i<10?'0':'')+i+':00';h+='<option value="'+t+'"'+(t===sel?' selected':'')+'>'+t+'</option>';}
+  return h;
+}
+function deadlineMs(){return state.campaign?Date.parse(state.campaign.deadline):NaN;}
+function isClosed(){var d=deadlineMs();return !isNaN(d)&&Date.now()>d;}
+function countdown(){
+  var ms=deadlineMs()-Date.now();
+  if(isNaN(ms))return {text:'尚未設定',closed:false,urgent:false};
+  if(ms<=0)return {text:'已截稿',closed:true,urgent:false};
+  var d=Math.floor(ms/DAY),h=Math.floor(ms%DAY/HOUR),m=Math.floor(ms%HOUR/60000);
+  var text=d>0?d+' 天 '+h+' 小時':(h>0?h+' 小時 '+m+' 分':Math.max(m,1)+' 分鐘');
+  return {text:text,closed:false,urgent:ms<DAY};
+}
+function nextDeadlineISO(){var d=new Date(Date.now()+7*DAY);d.setUTCHours(10,0,0,0);return d.toISOString();}
+function toast(msg,kind){
+  var t=$('#toast');if(!t)return;
+  t.textContent=msg;t.className='toast show'+(kind==='err'?' err':'');
+  clearTimeout(tt);tt=setTimeout(function(){t.classList.remove('show');},3800);
+}
+
+/* ---------- 文字顏色：逐字記錄是誰寫的 ---------- */
+function rtext(r){return (r||[]).map(function(x){return x.t;}).join('');}
+function runsOf(v,u){
+  if(Array.isArray(v))return v.filter(function(x){return x&&typeof x.t==='string'&&x.t;}).map(function(x){return {t:x.t,u:x.u||''};});
+  return v?[{t:String(v),u:u||''}]:[];
+}
+function mergeRuns(chars){
+  var out=[];
+  chars.forEach(function(x){var l=out[out.length-1];if(l&&l.u===x.u)l.t+=x.c;else out.push({t:x.c,u:x.u});});
+  return out;
+}
+function applyRuns(old,newText,uid){
+  var a=Array.from(rtext(old)),b=Array.from(newText),au=[],i,j,k;
+  old.forEach(function(r){Array.from(r.t).forEach(function(){au.push(r.u);});});
+  var p=0;while(p<a.length&&p<b.length&&a[p]===b[p])p++;
+  var s=0;while(s<a.length-p&&s<b.length-p&&a[a.length-1-s]===b[b.length-1-s])s++;
+  var am=a.slice(p,a.length-s),bm=b.slice(p,b.length-s),n=am.length,m=bm.length,mid=[];
+  if(n===0||m===0||n*m>4e6){
+    mid=bm.map(function(c){return {c:c,u:uid,ins:true};});
+  }else{
+    var W=m+1,dp=new Uint16Array((n+1)*W);
+    for(i=n-1;i>=0;i--)for(j=m-1;j>=0;j--){
+      dp[i*W+j]=am[i]===bm[j]?dp[(i+1)*W+j+1]+1:Math.max(dp[(i+1)*W+j],dp[i*W+j+1]);
+    }
+    i=0;j=0;
+    while(i<n&&j<m){
+      if(am[i]===bm[j]){mid.push({c:bm[j],u:au[p+i],ins:false});i++;j++;}
+      else if(dp[(i+1)*W+j]>=dp[i*W+j+1])i++;
+      else{mid.push({c:bm[j],u:uid,ins:true});j++;}
+    }
+    while(j<m){mid.push({c:bm[j],u:uid,ins:true});j++;}
+    i=0;
+    while(i<mid.length){
+      if(!mid[i].ins){
+        j=i;while(j<mid.length&&!mid[j].ins)j++;
+        if(j-i<=2&&i>0&&j<mid.length)for(k=i;k<j;k++)mid[k].u=uid;
+        i=j;
+      }else i++;
+    }
+  }
+  var out=[];
+  for(i=0;i<p;i++)out.push({c:a[i],u:au[i]});
+  mid.forEach(function(x){out.push(x);});
+  for(i=0;i<s;i++){var idx=a.length-s+i;out.push({c:a[idx],u:au[idx]});}
+  return mergeRuns(out);
+}
+function normSub(s){
+  if(!s)return null;
+  var o=Object.assign({},s),c=s.creatorId||'';
+  o.title=runsOf(s.title,c);o.body=runsOf(s.body,c);o.tags=runsOf(s.tags,c);
+  o.platforms=Array.isArray(s.platforms)?s.platforms.slice():(s.platform?[s.platform]:[]);
+  o.platformOther=s.platformOther||'';
+  o.materials=Array.isArray(s.materials)?s.materials.slice():(s.assetUrl?[{kind:'link',url:s.assetUrl,by:c}]:[]);
+  var st=s.story||{};
+  o.story={date:st.date||'',time:st.time||'',caption:runsOf(st.caption,''),links:Array.isArray(st.links)?st.links.slice():[]};
+  o.rev=s.rev||s.version||1;
+  o.status=ST[s.status]&&s.status!=='none'?s.status:'pending';
+  o.fieldBy=s.fieldBy||{};o.history=s.history||[];o.reviewerEdits=s.reviewerEdits||[];
+  o.notice=s.notice||null;o.review=s.review||null;o.close=s.close||null;
+  o.updatedAt=s.updatedAt||s.submittedAt||'';o.updatedBy=s.updatedBy||c;
+  return o;
+}
+function blankSub(id,now){
+  return {creatorId:id,rev:0,status:'pending',title:[],body:[],tags:[],platforms:[],platformOther:'',publishDate:'',materials:[],
+    story:{date:'',time:'',caption:[],links:[]},fieldBy:{},reviewerEdits:[],notice:null,review:null,history:[],submittedAt:now,updatedAt:now,updatedBy:id};
+}
+
+/* ---------- 資料層 ---------- */
+function mapDocs(q){var m={};q.docs.forEach(function(d){m[d.id]=clone(d.data());});return m;}
+function setSubs(m){var o={};Object.keys(m).forEach(function(k){o[k]=normSub(m[k]);});state.subs=o;}
+function setAccounts(m){state.accounts=Object.keys(m).map(function(k){return m[k];});}
+function makeLocal(){
+  var KEY='ksp-demo-v6',data=null;
+  function localPay(p){
+    var o={forms:{},files:{},contracts:{}};
+    if(p){
+      Object.keys(p.forms||{}).forEach(function(k){o.forms[p.uid+'|'+k]=p.forms[k];});
+      Object.keys(p.files||{}).forEach(function(k){o.files[p.uid+'|'+k]=p.files[k];});
+      Object.keys(p.contracts||{}).forEach(function(k){o.contracts[p.uid+'|'+k]=p.contracts[k];});
+    }
+    return o;
+  }
+  function load(){try{var r=localStorage.getItem(KEY);if(r)return JSON.parse(r);}catch(e){}return null;}
+  function save(){try{localStorage.setItem(KEY,JSON.stringify(data));}catch(e){toast('瀏覽器空間不足，這次的變更只會保留到關閉頁面。','err');}}
+  function push(){
+    state.campaign=data.campaign||null;setSubs(data.subs||{});setAccounts(data.accounts||{});state.briefs=clone(data.briefs||{});
+    state.cfees=clone(data.creatorfees||{});state.bfees=clone(data.brandfees||{});
+    state.loaded=true;scheduleRender();
+  }
+  data=load();
+  if(!data||!data.campaign){
+    data=demoSeed(Date.now());data.files=data.files||{};data.pay=localPay(data.pay);
+    data.creatorfees=data.fees.creator;data.brandfees=data.fees.brand;delete data.fees;save();
+  }
+  data.files=data.files||{};data.briefs=data.briefs||{};data.pay=data.pay||{forms:{},files:{},contracts:{}};
+  data.pay.contracts=data.pay.contracts||{};data.creatorfees=data.creatorfees||{};data.brandfees=data.brandfees||{};
+  window.addEventListener('storage',function(e){if(e.key===KEY){data=load()||data;push();}});
+  function ok(){return Promise.resolve();}
+  return {
+    mode:'local',start:function(){push();},
+    getSub:function(id){return Promise.resolve(data.subs[id]?normSub(clone(data.subs[id])):null);},
+    putSub:function(id,o){data.subs[id]=clone(o);save();push();return ok();},
+    delSub:function(id){delete data.subs[id];save();push();return ok();},
+    putCampaign:function(o){data.campaign=clone(o);save();push();return ok();},
+    getAccount:function(id){return Promise.resolve(data.accounts[id]?clone(data.accounts[id]):null);},
+    putAccount:function(id,o){data.accounts[id]=clone(o);save();push();return ok();},
+    delAccount:function(id){delete data.accounts[id];save();push();return ok();},
+    putBrief:function(id,o){data.briefs[id]=clone(o);save();push();return ok();},
+    delBrief:function(id){delete data.briefs[id];save();push();return ok();},
+    putFile:function(id,o){data.files[id]=clone(o);save();return ok();},
+    getFile:function(id){return Promise.resolve(data.files[id]?clone(data.files[id]):null);},
+    putPay:function(uid,cid,o){data.pay.forms[uid+'|'+cid]=clone(o);save();return ok();},
+    getPay:function(uid,cid){var v=data.pay.forms[uid+'|'+cid];return Promise.resolve(v?clone(v):null);},
+    putPayFile:function(uid,fid,o){data.pay.files[uid+'|'+fid]=clone(o);save();return ok();},
+    getPayFile:function(uid,fid){var v=data.pay.files[uid+'|'+fid];return Promise.resolve(v?clone(v):null);},
+    delPayFile:function(uid,fid){delete data.pay.files[uid+'|'+fid];save();return ok();},
+    getAudit:function(){return Promise.resolve(clone(data.audit||{events:[]}));},
+    putAudit:function(o){data.audit=clone(o);save();return ok();},
+    watchFees:function(){return function(){};},
+    getCreatorFee:function(cid){return Promise.resolve(data.creatorfees[cid]?clone(data.creatorfees[cid]):null);},
+    putCreatorFee:function(cid,o){data.creatorfees[cid]=clone(o);save();push();return ok();},
+    putBrandFee:function(cid,o){data.brandfees[cid]=clone(o);save();push();return ok();},
+    putContract:function(uid,cid,o){data.pay.contracts[uid+'|'+cid]=clone(o);save();return ok();},
+    getContract:function(uid,cid){var v=data.pay.contracts[uid+'|'+cid];return Promise.resolve(v?clone(v):null);}
+  };
+}
+function makeShared(db){
+  return {
+    mode:'shared',
+    start:function(){
+      var got={c:false,s:false,a:false,b:false};
+      function ready(){if(got.c&&got.s&&got.a&&got.b)state.loaded=true;scheduleRender();}
+      function fail(){state.loadErr=true;state.loaded=true;scheduleRender();}
+      db.doc('meta/campaign').onSnapshot(function(s){state.campaign=s.exists?clone(s.data()):null;got.c=true;ready();},fail);
+      db.collection('submissions').onSnapshot(function(q){setSubs(mapDocs(q));got.s=true;ready();},fail);
+      db.collection('accounts').onSnapshot(function(q){setAccounts(mapDocs(q));got.a=true;ready();},fail);
+      db.collection('briefs').onSnapshot(function(q){state.briefs=mapDocs(q);got.b=true;ready();},fail);
+    },
+    getSub:function(id){return db.doc('submissions/'+id).get().then(function(s){return s.exists?normSub(clone(s.data())):null;});},
+    putSub:function(id,o){return db.doc('submissions/'+id).set(o);},
+    delSub:function(id){return db.doc('submissions/'+id).delete();},
+    putCampaign:function(o){return db.doc('meta/campaign').set(o);},
+    getAccount:function(id){return db.doc('accounts/'+id).get().then(function(s){return s.exists?clone(s.data()):null;});},
+    putAccount:function(id,o){return db.doc('accounts/'+id).set(o);},
+    delAccount:function(id){return db.doc('accounts/'+id).delete();},
+    putBrief:function(id,o){return db.doc('briefs/'+id).set(o);},
+    delBrief:function(id){return db.doc('briefs/'+id).delete();},
+    putFile:function(id,o){return db.doc('files/'+id).set(o);},
+    getFile:function(id){return db.doc('files/'+id).get().then(function(s){return s.exists?clone(s.data()):null;});},
+    putPay:function(uid,cid,o){return db.doc('payments/'+uid+'/forms/'+cid).set(o);},
+    getPay:function(uid,cid){return db.doc('payments/'+uid+'/forms/'+cid).get().then(function(s){return s.exists?clone(s.data()):null;});},
+    putPayFile:function(uid,fid,o){return db.doc('payments/'+uid+'/files/'+fid).set(o);},
+    getPayFile:function(uid,fid){return db.doc('payments/'+uid+'/files/'+fid).get().then(function(s){return s.exists?clone(s.data()):null;});},
+    delPayFile:function(uid,fid){return db.doc('payments/'+uid+'/files/'+fid).delete();},
+    getAudit:function(){return db.doc('meta/audit').get().then(function(s){return s.exists?clone(s.data()):{events:[]};});},
+    putAudit:function(o){return db.doc('meta/audit').set(o);},
+    watchFees:function(kind,cid,cb){
+      var col=kind==='brand'?'brandfees':'creatorfees';
+      function fail(){}
+      if(cid)return db.doc(col+'/'+cid).onSnapshot(function(s){var m={};if(s.exists)m[cid]=clone(s.data());cb(m);},fail);
+      return db.collection(col).onSnapshot(function(q){cb(mapDocs(q));},fail);
+    },
+    getCreatorFee:function(cid){return db.doc('creatorfees/'+cid).get().then(function(s){return s.exists?clone(s.data()):null;});},
+    putCreatorFee:function(cid,o){return db.doc('creatorfees/'+cid).set(o);},
+    putBrandFee:function(cid,o){return db.doc('brandfees/'+cid).set(o);},
+    putContract:function(uid,cid,o){return db.doc('payments/'+uid+'/contracts/'+cid).set(o);},
+    getContract:function(uid,cid){return db.doc('payments/'+uid+'/contracts/'+cid).get().then(function(s){return s.exists?clone(s.data()):null;});}
+  };
+}
+async function boot(){
+  var db=null,u=null,as=null;
+  try{
+    if(window.claude&&window.claude.use){
+      var r=await Promise.all([
+        window.claude.use('db').catch(function(){return null;}),
+        window.claude.use('user').catch(function(){return null;}),
+        window.claude.use('assets').catch(function(){return null;}),
+        window.claude.use('downloads').catch(function(){return null;})
+      ]);
+      db=r[0];u=r[1];as=r[2];state.dl=r[3]||null;
+    }
+  }catch(e){db=null;}
+  api=db?makeShared(db):makeLocal();
+  state.mode=api.mode;state.assets=as||null;
+  if(u){
+    try{state.canWrite=await u.can('data.write');}catch(e){}
+    try{state.uid=await u.id();}catch(e){}
+  }
+  if(!db)state.uid='local';
+  try{var id=sessionStorage.getItem(SK);if(id)state.userId=id;}catch(e){}
+  api.start();
+  render();
+}
+
+/* ---------- 共用片段 ---------- */
+function pill(st){return '<span class="pill st-'+st+'"><span class="g" aria-hidden="true">'+GL[st]+'</span>'+ST[st]+'</span>';}
+/* 每個帳號依 id 產生固定的幾何頭像：同一個人永遠是同一張臉，改名也不會變。 */
+function hashStr(s){var h=2166136261;s=String(s);for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return h>>>0;}
+function avatar(a,lg){
+  var h=hashStr(a.id||a.name),hue=a.hue||210,sh='',i;
+  function r(n){h=Math.imul(h^(h>>>15),2246822519)>>>0;h=(h+0x9e3779b9)>>>0;return h%n;}
+  var offs=[-34,0,34,70],lights=[46,58,68];
+  for(i=0;i<3;i++){
+    var t=r(4),x=4+r(20),y=4+r(20),s=12+r(14),hh=(hue+offs[r(4)]+360)%360,f='hsl('+hh+' 64% '+lights[i]+'%)';
+    if(t===0)sh+='<circle cx="'+(x+s/2)+'" cy="'+(y+s/2)+'" r="'+(s/2)+'" fill="'+f+'"/>';
+    else if(t===1)sh+='<rect x="'+x+'" y="'+y+'" width="'+s+'" height="'+s+'" rx="'+Math.round(s/3)+'" fill="'+f+'"/>';
+    else if(t===2)sh+='<path d="M'+x+' '+(y+s)+'A'+s+' '+s+' 0 0 1 '+(x+s)+' '+y+'V'+(y+s)+'Z" fill="'+f+'"/>';
+    else sh+='<path d="M'+(x+s/2)+' '+y+'L'+(x+s)+' '+(y+s/2)+'L'+(x+s/2)+' '+(y+s)+'L'+x+' '+(y+s/2)+'Z" fill="'+f+'"/>';
+  }
+  return '<svg class="av'+(lg?' lg':'')+'" viewBox="0 0 40 40" style="--h:'+hue+'" aria-hidden="true" focusable="false"><rect class="avbg" width="40" height="40" fill="hsl('+hue+' 55% 90%)"/>'+sh+'</svg>';
+}
+function statusOf(a){var s=state.subs[a.id];return s?s.status:(state.briefs[a.id]?'none':'unopened');}
+function parseTags(str){
+  var seen={},out=[];
+  String(str||'').split(/[\s,，、]+/).forEach(function(t){
+    t=t.replace(/^[#＃]+/,'').trim();
+    if(t&&!seen[t.toLowerCase()]){seen[t.toLowerCase()]=1;out.push('#'+t);}
+  });
+  return out;
+}
+function missingTags(tagsText,requiredStr){
+  var have={};
+  String(tagsText||'').split(/[\s,，、]+/).forEach(function(t){t=t.replace(/^[#＃]+/,'').toLowerCase();if(t)have[t]=1;});
+  return parseTags(requiredStr).filter(function(t){return !have[t.slice(1).toLowerCase()];});
+}
+function tagChips(list,cls){return list.length?'<div class="chipset">'+list.map(function(t){return '<span class="tag '+(cls||'')+'">'+esc(t)+'</span>';}).join('')+'</div>':'';}
+function briefPlatforms(b){return platformsHTML({platforms:b.platforms||[],platformOther:b.platformOther||''});}
+function runsHTML(runs){
+  return (runs||[]).map(function(r){
+    var a=acc(r.u);
+    return isRev(a)?'<span class="ru" style="--h:'+a.hue+'" title="'+esc(a.name)+'">'+esc(r.t)+'</span>':esc(r.t);
+  }).join('');
+}
+function fieldsText(list){return (list||[]).map(function(f){return FLD[f]||f;}).join('、');}
+function byTag(field,s){
+  var u=s.fieldBy&&s.fieldBy[field],a=acc(u);
+  return isRev(a)?'<span class="ru by" style="--h:'+a.hue+'">'+esc(a.name)+' 修改</span>':'';
+}
+function wrapBy(field,s,html){
+  var u=s.fieldBy&&s.fieldBy[field];
+  return isRev(acc(u))?'<span'+colorAttr(u)+'>'+html+'</span>':html;
+}
+function fmtSize(n){return n>=1048576?(n/1048576).toFixed(1)+' MB':Math.max(1,Math.round(n/1024))+' KB';}
+function matSrc(m){return m.aid?'/_blob/'+m.aid:(m.fid?(fileCache[m.fid]||''):'');}
+function matHTML(m,removeIdx){
+  var h='<div class="mat">';
+  if(m.kind==='file'){
+    var src=matSrc(m),isImg=/^image\//.test(m.type||''),isVid=/^video\//.test(m.type||'');
+    if(isImg){
+      var im='<img class="thumb" alt="'+esc(m.name)+'" '+(m.fid?'data-fid="'+esc(m.fid)+'" ':'')+(src?'src="'+esc(src)+'"':'')+'>';
+      h+=m.aid?'<a href="'+esc(src)+'" target="_blank" rel="noopener noreferrer">'+im+'</a>':im;
+    }
+    else if(isVid&&src)h+='<video class="thumb" controls preload="metadata" src="'+esc(src)+'"></video>';
+    else h+='<div class="ph">'+esc((m.type||'檔案').split('/').pop().toUpperCase())+'</div>';
+    h+='<div class="nm">'+(src&&!isImg&&!isVid?'<a href="'+esc(src)+'" target="_blank" rel="noopener noreferrer">'+esc(m.name)+'</a>':esc(m.name))+'</div><div class="row2"><span class="muted">'+fmtSize(m.size||0)+'</span>';
+  }else{
+    var ok=safeLink(m.url),host='';
+    try{host=new URL(m.url).hostname;}catch(e){host=m.url;}
+    h+='<div class="ph">雲端連結</div><div class="nm">'+(ok?'<a href="'+esc(m.url)+'" target="_blank" rel="noopener noreferrer">'+esc(host)+'</a>':esc(m.url))+'</div><div class="row2"><span class="muted">連結</span>';
+  }
+  if(removeIdx!=null)h+='<button class="btn sm" type="button" data-act="rmMat" data-i="'+removeIdx+'" aria-label="移除素材">移除</button>';
+  else if(isRev(acc(m.by)))h+='<span class="ru by" style="--h:'+acc(m.by).hue+'">'+esc(nameOf(m.by))+'</span>';
+  return h+'</div></div>';
+}
+function matsHTML(list){
+  return list&&list.length?'<div class="mats">'+list.map(function(m){return matHTML(m,null);}).join('')+'</div>':'<span class="mat-empty">尚未提供素材</span>';
+}
+function platformsHTML(s){
+  var list=PLATFORMS.filter(function(p){return s.platforms.indexOf(p)>=0;});
+  if(!list.length)return '<span class="muted">未勾選</span>';
+  return '<div class="chipset">'+list.map(function(p){return '<span class="tag">'+esc(p==='其他'&&s.platformOther?'其他：'+s.platformOther:p)+'</span>';}).join('')+'</div>';
+}
+function legendHTML(s){
+  var ids={};
+  [s.title,s.body,s.tags,s.story.caption].forEach(function(r){r.forEach(function(x){ids[x.u]=1;});});
+  Object.keys(s.fieldBy||{}).forEach(function(k){ids[s.fieldBy[k]]=1;});
+  var revs=Object.keys(ids).filter(function(i){return isRev(acc(i));});
+  if(!revs.length)return '';
+  return '<div class="legend"><span class="muted">文字顏色</span><span class="lg"><i class="sw plain"></i>'+esc(nameOf(s.creatorId))+'（人選）</span>'+
+    revs.map(function(i){return '<span class="lg"><i class="sw" style="--h:'+acc(i).hue+'"></i>'+esc(nameOf(i))+'</span>';}).join('')+'</div>';
+}
+function storyHTML(s){
+  var st=s.story,has=st.date||st.time||rtext(st.caption)||st.links.length;
+  var h='<div class="story"><h3>IG 限動</h3>';
+  if(!has)return h+'<p class="muted">審稿員還沒有提供限動資訊。</p></div>';
+  h+='<dl class="meta"><div><dt>限動發布日'+byTag('storyDate',s)+'</dt><dd class="mono">'+wrapBy('storyDate',s,esc(fmtDay(st.date)))+'</dd></div>'+
+    '<div><dt>限動發布時間'+byTag('storyTime',s)+'</dt><dd class="mono">'+wrapBy('storyTime',s,esc(st.time||'未設定'))+'</dd></div>'+
+    '<div class="full"><dt>限動連結'+byTag('storyLinks',s)+'</dt><dd>'+(st.links.length?'<div class="linklist">'+st.links.map(function(u){
+      return wrapBy('storyLinks',s,safeLink(u)?'<a href="'+esc(u)+'" target="_blank" rel="noopener noreferrer">'+esc(u)+'</a>':esc(u));}).join('')+'</div>':'<span class="muted">未提供</span>')+'</dd></div></dl>'+
+    '<div class="lbl">限動文案</div><div class="paper ro sm">'+(runsHTML(st.caption)||'<span class="muted">未提供</span>')+'</div>';
+  return h+'</div>';
+}
+function missingHTML(s){
+  var b=state.briefs[s.creatorId];
+  if(!b||!b.requiredTags)return '';
+  var m=missingTags(rtext(s.tags),b.requiredTags);
+  return m.length?'<div class="warnline">缺少必要標籤：'+esc(m.join(' '))+'</div>':'';
+}
+function contentHTML(s){
+  return '<dl class="meta"><div class="full"><dt>稿件標題</dt><dd class="ttl">'+runsHTML(s.title)+'</dd></div>'+
+    '<div><dt>發布社群平台'+byTag('platforms',s)+'</dt><dd>'+wrapBy('platforms',s,platformsHTML(s))+'</dd></div>'+
+    '<div><dt>預計發布日'+byTag('publishDate',s)+'</dt><dd class="mono">'+wrapBy('publishDate',s,esc(fmtDay(s.publishDate)))+'</dd></div>'+
+    '<div class="full"><dt>素材'+byTag('materials',s)+'</dt><dd>'+matsHTML(s.materials)+'</dd></div></dl>'+
+    '<div class="lbl">文案內文 <span class="mono muted">'+wc(rtext(s.body))+' 字</span></div>'+
+    '<div class="paper ro">'+runsHTML(s.body)+'</div>'+
+    '<div class="lbl" style="margin-top:16px">標籤</div><div class="tagline">'+(runsHTML(s.tags)||'<span class="muted">未填</span>')+'</div>'+missingHTML(s)+
+    storyHTML(s)+legendHTML(s);
+}
+function historyHTML(s){
+  var h=(s&&s.history||[]).slice().reverse();
+  if(!h.length)return '';
+  return '<section class="hist"><h3>修訂紀錄</h3><ul class="tl">'+h.map(function(e){
+    return '<li><span class="dot t-'+esc(e.type)+'"></span><div><div class="t-line"><b style="font-weight:500">'+esc(EVT[e.type]||e.type)+'</b>'+nameTag(e.by)+
+      '<span class="muted small mono">第 '+esc(e.v)+' 版 · '+esc(fmt(e.at))+'</span></div>'+
+      (e.fields&&e.fields.length?'<div class="t-note">'+(e.type==='notify'?'修改過：':'修改：')+esc(fieldsText(e.fields))+'</div>':'')+
+      (e.note?'<div class="t-note">「'+esc(e.note)+'」</div>':'')+'</div></li>';
+  }).join('')+'</ul></section>';
+}
+function deadlineCard(editable){
+  var c=state.campaign,cd=countdown(),dis=(state.busy||readOnly())?' disabled':'';
+  var h='<aside class="card dl"><div class="dl-top"><span class="eyebrow">截稿時間</span>'+
+    '<span class="cd'+(cd.closed?' closed':(cd.urgent?' urgent':''))+'" data-cd>'+esc(cd.text)+'</span></div>'+
+    '<div class="dl-date">'+esc(fmtFull(c.deadline))+'</div>';
+  if(editable){
+    h+='<details'+(state.dlOpen?' open':'')+' id="dl-details"><summary>調整截稿時間</summary><div class="dl-edit">'+
+      '<input id="dl-input" type="datetime-local" value="'+esc(toInput(c.deadline))+'" aria-label="截稿時間">'+
+      '<div class="dl-btns"><button class="btn sm primary" type="button" data-act="saveDeadline"'+dis+'>儲存</button>'+
+      '<button class="btn sm" type="button" data-act="closeNow"'+dis+'>立即截稿（示範）</button>'+
+      '<button class="btn sm" type="button" data-act="extend"'+dis+'>改為 7 天後</button></div>'+
+      '<p class="muted small">截稿後人選無法再更新稿件，審稿員仍可繼續編修與定稿。</p></div></details>';
+  }
+  return h+'</aside>';
+}
+function campaignHead(editable){
+  var c=state.campaign;
+  return '<section class="head"><div><p class="eyebrow">合作專案'+(c.brand?' · '+esc(c.brand):'')+'</p><h1>'+esc(c.name)+'</h1><p class="brief">'+esc(c.brief)+'</p></div>'+deadlineCard(editable)+'</section>';
+}
+
+/* ---------- 編修表單（審稿員與人選共用） ---------- */
+function blankPay(){return {bankName:'',bankCode:'',bankAccount:'',files:{idFront:null,idBack:null,bankbook:null}};}
+function draftFrom(s,id){
+  if(!s){
+    var b=state.briefs[id]||{};
+    return {cl:{},pay:blankPay(),payEdit:true,title:'',platforms:(b.platforms||[]).slice(),platformOther:b.platformOther||'',publishDate:b.publishDate||'',materials:[],body:'',
+      tags:parseTags(b.requiredTags).join(' '),storyDate:'',storyTime:'',storyCaption:'',storyLinks:['']};
+  }
+  return {cl:{},pay:blankPay(),payEdit:!(s.pay&&s.pay.complete),title:rtext(s.title),platforms:s.platforms.slice(),platformOther:s.platformOther||'',publishDate:s.publishDate||'',materials:clone(s.materials),
+    body:rtext(s.body),tags:rtext(s.tags),storyDate:s.story.date,storyTime:s.story.time,storyCaption:rtext(s.story.caption),
+    storyLinks:s.story.links.length?s.story.links.slice():['']};
+}
+function payImg(f,label,uid,zoom){
+  var src=payCache[f.fid]||'';
+  return '<img class="pthumb" alt="'+esc(label)+'" data-pfid="'+esc(f.fid)+'" data-pfuid="'+esc(uid||'')+'"'+(src?' src="'+esc(src)+'"':'')+(zoom?' data-act="zoom" title="點一下放大或縮小"':'')+'>';
+}
+function paySection(s){
+  var d=state.draft,p=d.pay,sum=s&&s.pay&&s.pay.complete?s.pay:null;
+  var h='<div class="formsec"><h3>匯款資料與證件</h3><p class="sub">用來匯款稿費，只有審稿員看得到。文字和三份影本都必填，沒有填完整就無法送出。</p>';
+  if(state.mode==='shared'&&!state.uid){
+    return h+'<div class="banner bad">目前無法確認你的登入身分，暫時不能儲存匯款資料。請重新整理頁面，並確認已登入 claude.ai。</div></div>';
+  }
+  if(sum&&!d.payEdit){
+    return h+'<div class="note-box"><div class="who">已提供 · '+esc(fmt(sum.at))+'</div><p>'+esc(sum.bankName)+'（代碼 '+esc(sum.bankCode)+'），帳號末四碼 '+esc(sum.last4)+'。身分證正反面與銀行帳號影本都已上傳。</p></div>'+
+      '<div><button class="btn sm" type="button" data-act="payEdit">更新匯款資料</button></div></div>';
+  }
+  h+='<div class="grid2">'+
+    '<div class="fld"><label for="f-pbank">銀行名稱</label><input id="f-pbank" data-p="bankName" maxlength="30" autocomplete="off" value="'+esc(p.bankName)+'" placeholder="例如：台灣銀行"></div>'+
+    '<div class="fld"><label for="f-pcode"><span>銀行代碼</span><span class="opt">3 碼，含分行為 7 碼</span></label><input id="f-pcode" data-p="bankCode" inputmode="numeric" maxlength="7" autocomplete="off" value="'+esc(p.bankCode)+'" placeholder="例如：004"></div>'+
+    '<div class="fld span2"><label for="f-pacct"><span>銀行帳號</span><span class="opt">只填數字</span></label><input id="f-pacct" data-p="bankAccount" inputmode="numeric" maxlength="24" autocomplete="off" value="'+esc(p.bankAccount)+'"></div></div>'+
+    '<div class="slots">'+PAYFILES.map(function(x){
+      var f=p.files[x[0]];
+      return '<div class="slot"><div class="lbl">'+x[1]+(f?' <span class="opt">已上傳</span>':'')+'</div>'+(f?payImg(f,x[1],state.uid,false):'<div class="ph">尚未上傳</div>')+
+        '<input id="f-pay-'+x[0]+'" type="file" accept="image/*" data-pay="'+x[0]+'" aria-label="上傳'+x[1]+'"></div>';
+    }).join('')+'</div>'+
+    '<p class="muted small">'+(state.uploading>0?'上傳中…':'請用拍照或掃描成圖片檔（JPG、PNG），確認文字清楚可讀。圖片會自動縮小，每張約 200 KB 以內。')+'</p>'+
+    (sum?'<div><button class="btn sm" type="button" data-act="payCancel">取消更新，沿用已提供的資料</button></div>':'')+'</div>';
+  return h;
+}
+function contractSection(s){
+  var d=state.draft,cid=me().id,cs=contractState(cid,s);
+  var h='<div class="formsec"><h3>合作條款確認</h3>';
+  if(!cs.hasFee){
+    return h+'<div class="banner">人選合作費用還沒有設定。審稿員（LV）設定後，才能確認合作條款並交稿。</div></div>';
+  }
+  if(cs.accepted){
+    return h+'<div class="note-box st-approved"><div class="who">已確認 · '+esc(CONTRACT.name)+' v'+esc(CONTRACT.version)+' · '+esc(fmt(s.contract.at))+'</div><p>你已逐條確認合作條款，人選合作費用為 '+esc(money(cs.cf.creatorFee))+'（未稅）。</p></div>'+
+      '<details><summary class="small" style="cursor:pointer;min-height:32px;display:flex;align-items:center">查看條款內容</summary>'+clausesHTML(contractClauses(contractCtx(cid,cs.cf)),null)+'</details></div>';
+  }
+  var cl=contractClauses(contractCtx(cid,cs.cf)),n=cl.filter(function(c){return d.cl[c.n];}).length;
+  return h+'<p class="sub">'+esc(CONTRACT.name)+' v'+esc(CONTRACT.version)+'（示範版）。請逐條閱讀並勾選，全部勾選才能送出。</p>'+
+    (cs.stale?'<div class="banner">合作條款或人選合作費用有更新，請重新確認。</div>':'')+
+    clausesHTML(cl,d.cl)+
+    '<p class="muted small"><span id="clcount" class="mono">'+n+' / '+cl.length+'</span> 條已勾選。這是簡易示範版條款，不能取代正式合約，正式使用前請交給法務或律師審閱。</p></div>';
+}
+function clausesHTML(cl,checks){
+  return '<div class="clauses">'+cl.map(function(c){
+    var body='<span><b>第 '+c.n+' 條　'+esc(c.title)+'</b><br>'+esc(c.text)+'</span>';
+    return checks?'<label class="clause" for="f-cl'+c.n+'"><input id="f-cl'+c.n+'" type="checkbox" data-cl="'+c.n+'"'+(checks[c.n]?' checked':'')+'>'+body+'</label>':'<div class="clause">'+body+'</div>';
+  }).join('')+'</div>';
+}
+function formHTML(role,s){
+  var d=state.draft,isR=role==='reviewer',dis=(state.busy||readOnly()||state.uploading>0||(!isR&&!contractState(me().id,s).hasFee))?' disabled':'';
+  var stale=s&&state.draftRev!==s.rev;
+  var warn='';
+  if(stale)warn='<div class="banner bad">稿件剛被其他人更新到第 '+esc(s.rev)+' 版。你的修改還沒儲存，請先<button class="btn sm" type="button" data-act="reloadDraft">放棄修改並重新載入</button></div>';
+  else if(isR&&s&&(s.status==='approved'||s.status==='confirmed'))warn='<div class="banner">這份稿件目前是「'+ST[s.status]+'」。編修後狀態會改回「待審」。</div>';
+  else if(!isR&&s&&s.status==='approved')warn='<div class="banner">這份稿件已經定稿。更新後會重新送審。</div>';
+  var errs=state.errors.length?'<ul class="errs" role="alert">'+state.errors.map(function(e){return '<li>'+esc(e)+'</li>';}).join('')+'</ul>':'';
+  var other=d.platforms.indexOf('其他')>=0?'<div class="fld span2"><label for="f-other">其他平台名稱</label><input id="f-other" data-f="platformOther" maxlength="30" value="'+esc(d.platformOther)+'" placeholder="例如：YouTube、部落格"></div>':'';
+  var bf=state.briefs[s?s.creatorId:(isR?state.editing:me().id)];
+  var req=bf?parseTags(bf.requiredTags):[];
+  var reqHint=req.length?'<div class="muted small" style="margin-top:8px">必要標籤'+(isR?'':'（送出時需要包含）')+'：</div><div style="margin-top:4px">'+tagChips(req,'req')+'</div>':'';
+  var h=warn+errs+'<div class="grid2">'+
+    '<div class="fld span2"><label for="f-title">稿件標題</label><input id="f-title" data-f="title" maxlength="60" value="'+esc(d.title)+'" placeholder="例如：通勤十分鐘的手沖"></div>'+
+    '<div class="fld span2"><div class="lbl">發布社群平台 <span class="opt">可複選</span></div><div class="pf" role="group" aria-label="發布社群平台">'+
+      PLATFORMS.map(function(p,i){return '<label for="f-pf'+i+'"><input id="f-pf'+i+'" type="checkbox" data-pf="'+esc(p)+'"'+(d.platforms.indexOf(p)>=0?' checked':'')+'>'+esc(p)+'</label>';}).join('')+'</div></div>'+other+
+    '<div class="fld"><label for="f-date">預計發布日</label><select id="f-date" data-f="publishDate">'+dateOpts(d.publishDate)+'</select></div>'+
+    '<div class="fld span2"><div class="lbl">素材 <span class="opt">上傳檔案，或貼上雲端連結</span></div>'+
+      (d.materials.length?'<div class="mats" style="margin-bottom:12px">'+d.materials.map(function(m,i){return matHTML(m,i);}).join('')+'</div>':'')+
+      '<div class="inline" style="margin-bottom:10px"><input id="f-link" type="url" inputmode="url" placeholder="貼上雲端連結（https://）" aria-label="雲端連結"><button class="btn" type="button" data-act="addLink">加入連結</button></div>'+
+      '<input id="f-file" type="file" multiple accept="image/*,video/mp4,video/webm,application/pdf" aria-label="上傳檔案">'+
+      '<p class="muted small" style="margin-top:6px">'+(state.uploading>0?'上傳中…':(state.assets?'可上傳圖片、mp4／webm 影片或 PDF，單檔 20 MB 以內。':'目前只能上傳圖片（會自動縮小）。影片或 PDF 請貼雲端連結。'))+'</p></div>'+
+    '<div class="fld span2"><label for="f-body">文案內文</label><textarea id="f-body" class="paper" data-f="body" rows="11">\n'+esc(d.body)+'</textarea>'+
+      '<div class="fld-meta"><span id="count" class="mono">'+wc(d.body)+' 字</span></div></div>'+
+    '<div class="fld span2"><label for="f-tags"><span>標籤</span><span class="opt">用空格分開</span></label><input id="f-tags" data-f="tags" value="'+esc(d.tags)+'" placeholder="#晨嵐咖啡 #合作">'+reqHint+'</div></div>';
+  if(!isR)h+=paySection(s)+contractSection(s);
+  if(isR){
+    h+='<div class="formsec"><h3>IG 限動</h3><p class="sub">審稿員在這裡提供限動的發布日期、時間、文案與連結，人選會看到。</p><div class="grid2">'+
+      '<div class="fld"><label for="f-sdate">限動發布日</label><select id="f-sdate" data-f="storyDate">'+dateOpts(d.storyDate)+'</select></div>'+
+      '<div class="fld"><label for="f-stime">限動發布時間 <span class="opt">每小時一格</span></label><select id="f-stime" data-f="storyTime">'+timeOpts(d.storyTime)+'</select></div>'+
+      '<div class="fld span2"><label for="f-scap">限動文案</label><textarea id="f-scap" class="paper sm" data-f="storyCaption" rows="5">\n'+esc(d.storyCaption)+'</textarea></div>'+
+      '<div class="fld span2"><div class="lbl">限動連結 <span class="opt">可新增多條</span></div>'+
+        d.storyLinks.map(function(u,i){return '<div class="linkrow"><input id="f-sl'+i+'" type="url" inputmode="url" data-sl="'+i+'" value="'+esc(u)+'" placeholder="https://" aria-label="限動連結 '+(i+1)+'"><button class="btn" type="button" data-act="rmSl" data-i="'+i+'" aria-label="移除這條連結">移除</button></div>';}).join('')+
+        '<button class="btn sm" type="button" data-act="addSl">＋ 新增連結</button></div></div></div>';
+  }
+  h+='<div class="actions"><button class="btn primary" type="submit"'+dis+(stale?' disabled':'')+'>'+(isR?'儲存編修':(s?'更新稿件':'送出稿件'))+'</button>'+
+    (isR?'<button class="btn" type="button" data-act="cancelEdit">取消</button>':'')+
+    '<span class="muted small">'+(isR?'儲存後，你修改的文字會用你的顏色標示。':'截稿前可以重複更新，每次更新都會留下修訂紀錄。')+'</span></div>';
+  return h;
+}
+
+/* ---------- 版面 ---------- */
+function topbar(){
+  var u=me(),isR=isRev(u),s=!isR?state.subs[u.id]:null;
+  var sync=state.mode==='shared'?'<span class="sync"><i></i>共用資料</span>':'<span class="sync local"><i></i>本機示範</span>';
+  var badge=(s&&s.status==='confirming')?'<span class="badge" role="status">1 則待確認通知</span>':((s&&s.status==='approved'&&s.close&&s.close.status==='returned')?'<span class="badge" role="status">結案數據要補件</span>':'');
+  return '<header class="top"><div class="brand"><span class="seal" aria-hidden="true">審</span><div><div class="brand-name">供稿審核系統</div><div class="brand-sub">網紅自媒體合作</div></div></div>'+
+    '<div class="top-r">'+badge+sync+(isR&&(allow('manageAccounts')||state.view!=='main')?'<button class="btn sm" type="button" data-act="toggleAcc">'+(state.view!=='main'?'‹ 回審稿':'帳號管理')+'</button>':'')+
+    '<div class="me">'+avatar(u)+'<div class="me-t"><b>'+esc(u.name)+'</b><span>'+(isR?'審稿員 '+lvBadge(u):'合作人選')+'</span></div></div>'+
+    '<button class="btn sm ghost" type="button" data-act="logout">登出</button></div></header>';
+}
+function banners(){
+  var h='';
+  if(state.loadErr)h+='<div class="banner bad" role="alert">資料連線中斷，目前畫面可能不是最新的。請重新整理頁面。</div>';
+  if(state.mode==='local')h+='<div class="banner info">本機示範模式：資料只存在這個瀏覽器，換裝置看不到。要跨裝置共用，請從 Claude 的 Artifacts 連結開啟。</div>';
+  if(readOnly())h+='<div class="banner">你目前只有檢視權限，無法送出或編修。請向專案擁有者要求編輯權限。</div>';
+  return h;
+}
+function loginView(){
+  var rows=accounts().filter(function(a){return a.demo;}).map(function(a){
+    return '<li><div><div class="d-name">'+esc(a.name)+' <span class="muted small">'+(isRev(a)?'審稿員':'人選')+'</span> '+lvBadge(a)+'</div><div class="d-cred">'+esc(a.id)+' / '+esc(a.pw)+'</div></div>'+
+      '<button class="btn sm" type="button" data-act="fill" data-id="'+esc(a.id)+'">帶入</button></li>';
+  }).join('');
+  return '<main class="login"><section class="login-intro"><p class="eyebrow">網紅自媒體合作</p><h1>供稿審核系統</h1>'+
+    '<p class="lead">人選用自己的帳號上傳稿件，截稿前可以隨時更新。審稿員直接在稿件上編修，通知人選回來確認。</p>'+
+    '<div class="sample" aria-hidden="true"><div class="sample-top"><span class="pill st-confirming"><span class="g">✎</span>待人選確認</span><span class="muted small mono">第 4 版</span></div>'+
+    '<div class="paper ro"><span class="ru" style="--h:215">本篇為合作內容。</span>早上七點四十分，等電梯的這十分鐘，是我一天裡少數屬於自己的時間。<span class="ru" style="--h:330">放涼後甜感會更明顯，</span>很適合帶去公司慢慢喝。</div>'+
+    '<div class="legend" style="margin-top:12px"><span class="lg"><i class="sw plain"></i>人選</span><span class="lg"><i class="sw" style="--h:215"></i>林主編</span><span class="lg"><i class="sw" style="--h:330"></i>王編輯</span></div></div>'+
+    '<ul class="who-list"><li><b>審稿員</b><span>看到全部人選的稿件，直接編修並提供限動資訊，文字用自己的顏色標示。</span></li>'+
+    '<li><b>合作人選</b><span>只看得到自己的稿件，收到通知後確認，或再自己修改。</span></li></ul></section>'+
+    '<section class="card login-card"><h2>登入</h2><form id="login-form" novalidate>'+
+    '<div class="fld"><label for="login-id">帳號</label><input id="login-id" autocomplete="off" autocapitalize="none" spellcheck="false" value="'+esc(state.loginId)+'"></div>'+
+    '<div class="fld"><label for="login-pw">密碼</label><input id="login-pw" type="password" autocomplete="off" value="'+esc(state.loginPw)+'"></div>'+
+    '<p class="err" role="alert">'+esc(state.loginErr)+'</p>'+
+    '<button class="btn primary block" type="submit">登入</button></form>'+
+    '<div class="demo"><h3>示範帳號</h3><p class="muted small">這是示範版，帳密直接列在這裡，只用來切換角色，不具備真正的安全性。</p><ul>'+rows+'</ul></div></section></main>'+
+    '<p class="foot">畫面中的人選、品牌與稿件皆為虛構的示範資料。</p>';
+}
+
+/* ---------- 審稿員 ---------- */
+function ensureSel(){
+  var list=creators();
+  if(state.sel&&acc(state.sel))return;
+  var p=list.filter(function(a){return statusOf(a)==='pending';})[0]||list[0];
+  state.sel=p?p.id:null;
+}
+function filteredCreators(){
+  var q=state.q.trim().toLowerCase();
+  return creators().filter(function(a){
+    var st=statusOf(a);
+    if(state.filter!=='all'&&st!==state.filter)return false;
+    if(!q)return true;
+    var s=state.subs[a.id];
+    return (a.name+' '+(a.platform||'')+' '+(s?rtext(s.title):'')).toLowerCase().indexOf(q)>=0;
+  }).sort(function(x,y){
+    var d=PRIORITY[statusOf(x)]-PRIORITY[statusOf(y)];
+    return d||x.name.localeCompare(y.name,'zh-Hant');
+  });
+}
+function listHTML(){
+  var rows=filteredCreators();
+  if(!rows.length)return '<div class="nores">沒有符合的人選。</div>';
+  return rows.map(function(a){
+    var s=state.subs[a.id],st=statusOf(a);
+    return '<button class="row" type="button" data-act="select" data-id="'+esc(a.id)+'" aria-current="'+(a.id===state.sel)+'">'+avatar(a)+
+      '<span class="r-main"><span class="r-name">'+esc(a.name)+' <span class="muted small">'+esc(a.platform||'')+'</span></span>'+
+      '<span class="r-title">'+(s?esc(rtext(s.title)):'尚未上傳稿件')+'</span></span>'+
+      '<span class="r-side">'+pill(st)+closeTag(a)+'<span class="r-time mono">'+(s?esc(fmt(s.updatedAt)):'')+'</span></span></button>';
+  }).join('');
+}
+function renderList(){var el=$('#list');if(el)el.innerHTML=listHTML();}
+function getReview(id,s){
+  var r=state.review[id];
+  if(!r||r.v!==s.rev){
+    var pre=s.review&&s.review.rev===s.rev&&s.review.checks&&s.review.checks.length===CHECKS.length;
+    r=state.review[id]={v:s.rev,checks:pre?s.review.checks.slice():CHECKS.map(function(){return false;})};
+  }
+  return r;
+}
+function reviewPanel(a,s){
+  var rv=getReview(a.id,s),n=rv.checks.filter(Boolean).length,editing=state.editing===a.id;
+  var cur='';
+  if(s.status==='confirming'&&s.notice)cur='<div class="note-box st-confirming"><div class="who">已通知 '+esc(a.name)+' · '+esc(nameOf(s.notice.by))+' · '+esc(fmt(s.notice.at))+'，等待確認</div>'+(s.notice.message?'<p>'+esc(s.notice.message)+'</p>':'')+'</div>';
+  else if(s.status==='confirmed')cur='<div class="note-box st-confirmed"><div class="who">'+esc(a.name)+' 已確認編修內容</div><p>檢查清單確認後就可以定稿。</p></div>';
+  else if(s.status==='approved')cur='<div class="note-box st-approved"><div class="who">已定稿'+(s.review?' · '+esc(nameOf(s.review.by))+' · '+esc(fmt(s.review.at)):'')+'</div></div>';
+  var dis=(state.busy||readOnly()||editing)?' disabled':'';
+  var pend=s.reviewerEdits.length?'<p class="muted small" style="margin-bottom:12px">尚未通知的修改：'+esc(fieldsText(s.reviewerEdits))+'</p>':'';
+  return '<section class="rv"><h3>審核</h3>'+cur+pend+
+    (editing?'<p class="muted small" style="margin-bottom:12px">編修中。先儲存或取消，才能通知人選或定稿。</p>':'')+
+    '<fieldset><legend><span>檢查清單</span><span class="mono muted" id="chkcount">'+n+' / '+CHECKS.length+'</span></legend>'+
+    CHECKS.map(function(t,i){return '<label class="chk"><input type="checkbox" data-chk="'+i+'"'+(rv.checks[i]?' checked':'')+'><span>'+esc(t)+'</span></label>';}).join('')+'</fieldset>'+
+    '<div class="fld"><label for="msg"><span>給人選的訊息</span><span class="opt">選填，通知或定稿時一併送出</span></label>'+
+    '<textarea id="msg" rows="3" placeholder="例如：我調整了文案和限動時間，請看一下。">\n'+esc(state.msg[a.id]||'')+'</textarea></div>'+
+    '<p class="err" role="alert" style="margin-top:8px">'+esc(state.reviewErr)+'</p>'+
+    '<div class="decide"><button class="btn d-rev" type="button" data-act="notify"'+dis+'>✎ 通知人選確認</button>'+
+    '<button class="btn d-ok" type="button" data-act="approve"'+dis+'>✓ 定稿</button></div>'+
+    (s.status!=='pending'?'<button class="btn sm ghost" type="button" data-act="reopen"'+dis+'>改回待審</button>':'')+'</section>';
+}
+function payPanel(a,s){
+  var h='<section class="paysec"><div class="tool"><h3>匯款與證件</h3></div>';
+  if(!allow('viewPay')){
+    return h+'<p class="muted">'+(s.pay?'人選已提供匯款資料。':'人選還沒有提供匯款資料。')+'你的等級是 '+esc(levelLabel(levelOf(me())))+'，匯款與證件只有 LV 審稿員可以查閱。</p></section>';
+  }
+  if(!s.pay)return h+'<div class="warnline" style="margin-top:0">人選還沒有提供匯款資料。</div></section>';
+  var v=state.payView[a.id];
+  if(!v||v.at!==payKey(s)||v.loading)return h+'<p class="muted">讀取中…</p></section>';
+  if(!v.data){
+    return h+'<p class="muted">看不到這位人選的匯款資料。可能是你的權限不足（需要編輯者以上），或對方還沒有重新提供。</p>'+
+      '<p class="muted small" style="margin-top:6px">人選填寫的摘要：'+esc(s.pay.bankName)+'（代碼 '+esc(s.pay.bankCode)+'），帳號末四碼 '+esc(s.pay.last4)+'。</p></section>';
+  }
+  var d=v.data;
+  return h+'<dl class="meta"><div><dt>銀行名稱</dt><dd>'+esc(d.bankName)+'</dd></div><div><dt>銀行代碼</dt><dd class="mono">'+esc(d.bankCode)+'</dd></div>'+
+    '<div class="full"><dt>銀行帳號</dt><dd class="mono">'+esc(d.bankAccount)+' <button class="btn sm" type="button" data-act="copy" data-text="'+esc(d.bankAccount)+'">複製</button></dd></div></dl>'+
+    '<div class="slots">'+PAYFILES.map(function(x){
+      var f=d.files&&d.files[x[0]];
+      return '<div class="slot"><div class="lbl">'+x[1]+'</div>'+(f?payImg(f,x[1],d.uid,true):'<div class="ph">缺少</div>')+
+        (f&&canDownload()?'<button class="btn sm" type="button" data-act="dlPay" data-k="'+x[0]+'"'+(state.busy?' disabled':'')+'>下載圖片</button>':'')+'</div>';
+    }).join('')+'</div><p class="muted small" style="margin-top:8px">點一下圖片可以放大或縮小。更新時間：'+esc(fmt(d.at))+(canDownload()?'。下載的檔案不再受權限保護，請妥善保管。':'')+'</p></section>';
+}
+function contractPanel(a,s){
+  var h='<section class="ctsec"><div class="tool"><h3>合作條款</h3></div>',c=s.contract;
+  if(!c)return h+'<div class="warnline" style="margin-top:0">人選還沒有確認合作條款。</div></section>';
+  h+='<p>'+esc(CONTRACT.name)+' v'+esc(c.version)+'，人選已於 '+esc(fmt(c.at))+' 逐條確認'+(c.version!==CONTRACT.version?'。目前版本是 v'+esc(CONTRACT.version)+'，需要重新確認':'')+'。</p>';
+  if(allow('viewPay')){
+    var v=state.payView[a.id],cf=feeOf('creator',a.id);
+    if(cf&&cf.rev!==c.feeRev)h+='<div class="warnline">人選合作費用在確認後有調整，人選下次更新稿件時需要重新確認。</div>';
+    if(v&&!v.loading&&v.at===payKey(s)&&v.contract){
+      h+='<p class="muted small" style="margin-top:6px">確認當時的人選合作費用：'+esc(money(v.contract.creatorFee))+'（未稅），付款期限 '+esc(v.contract.payDays)+' 天。</p>'+
+        '<details><summary class="small" style="cursor:pointer;min-height:32px;display:flex;align-items:center">查看人選確認的條款全文</summary>'+clausesHTML(v.contract.clauses||[],null)+'</details>';
+    }
+  }
+  return h+'</section>';
+}
+function closePanel(a,s){
+  var cs=closeState(s),dis=(state.busy||readOnly())?' disabled':'';
+  var h='<section class="clsec"><div class="tool"><h3>結案數據</h3>'+(cs.k!=='na'?'<span class="ctag c-'+cs.k+(cs.overdue?' late':'')+'">'+esc(CL[cs.k])+(cs.overdue?'・逾期':'')+'</span>':'')+'</div>';
+  if(cs.k==='na')return h+'<p class="muted">稿件定稿後才開放結案數據。人選需在合作曝光後 14 日內上傳。</p></section>';
+  h+='<p class="muted small" style="margin-bottom:12px">曝光日 '+esc(fmtDay(exposureEnd(s)))+'，繳交期限 '+esc(fmtDay(cs.due))+'（曝光後 14 日）'+(cs.overdue?'，<b style="color:var(--bad)">已逾期</b>':'')+'。</p>';
+  if(cs.k==='wait')return h+'<p class="muted">人選還沒有上傳結案數據。</p></section>';
+  var c=cs.c,rv=c.review;
+  h+=(c.late?'<div class="warnline" style="margin-top:0;margin-bottom:12px">這份數據是在期限後才上傳的。</div>':'')+blocksSummaryHTML(s,c)+
+    '<p class="muted small" style="margin-top:4px">上傳者：'+esc(nameOf(c.submittedBy))+' · '+esc(fmt(c.submittedAt))+'</p>';
+  if(cs.k==='returned'&&rv)h+='<div class="note-box st-confirming" style="margin-top:12px"><div class="who">已退回補件 · '+esc(nameOf(rv.by))+' · '+esc(fmt(rv.at))+'</div><p>'+esc(rv.note||'')+'</p></div>';
+  if(cs.k==='submitted'&&allow('confirmClose')){
+    h+='<div class="fld" style="margin-top:14px"><label for="cmsg"><span>給人選的訊息</span><span class="opt">結案時選填，退回補件時必填</span></label>'+
+      '<textarea id="cmsg" rows="3" placeholder="例如：限動的截圖看不到日期，請重新截圖。">\n'+esc(state.cmsg[a.id]||'')+'</textarea></div>'+
+      '<p class="err" role="alert" style="margin-top:8px">'+esc(state.cerr)+'</p>'+
+      '<div class="decide"><button class="btn d-ok" type="button" data-act="closeOk"'+dis+'>✓ 確認無誤，結案</button>'+
+      '<button class="btn d-rev" type="button" data-act="closeReturn"'+dis+'>✎ 退回補件</button></div>';
+  }
+  if(cs.k==='closed'){
+    var due=payDue(s),late=!!due&&todayStr()>due&&!c.paid,n=(s.contract&&s.contract.payDays)||30;
+    h+='<div class="note-box st-approved" style="margin-top:12px"><div class="who">已結案 · '+esc(nameOf(rv&&rv.by))+' · '+esc(fmt(c.closedAt))+'</div>'+(rv&&rv.note?'<p>'+esc(rv.note)+'</p>':'')+'</div>'+
+      '<dl class="meta"><div><dt>合約付款日（發布日起 '+esc(n)+' 天）</dt><dd class="mono">'+esc(fmtDay(due))+(late?' <span style="color:var(--bad);font-family:var(--f-sans)">已逾付款日</span>':'')+'</dd></div>'+
+      '<div><dt>付款狀態</dt><dd>'+(c.paid?'已付款 · '+esc(fmtDay(c.paid.date))+' · '+esc(nameOf(c.paid.by)):'尚未付款')+'</dd></div></dl>';
+    if(allow('markPaid'))h+=(c.paid?'<button class="btn sm" type="button" data-act="unpaid"'+dis+'>撤銷付款標記</button>':'<button class="btn d-ok" type="button" data-act="markPaid"'+dis+'>標記已付款</button>');
+    else h+='<p class="muted small">付款由 LV 審稿員處理。</p>';
+  }
+  return h+'</section>';
+}
+function briefSummary(a,dis){
+  var b=state.briefs[a.id];
+  if(!b)return '';
+  return '<section class="bsum"><div class="tool"><h3>合作設定</h3><button class="btn sm" type="button" data-act="openBrief" data-id="'+esc(a.id)+'"'+(dis||'')+'>編輯設定</button></div>'+
+    '<dl class="meta"><div><dt>合作平台</dt><dd>'+briefPlatforms(b)+'</dd></div>'+
+    '<div><dt>預計發布日</dt><dd class="mono">'+esc(fmtDay(b.publishDate))+'</dd></div>'+
+    '<div class="full"><dt>必要標籤</dt><dd>'+(parseTags(b.requiredTags).length?tagChips(parseTags(b.requiredTags),'req'):'<span class="muted">未設定</span>')+'</dd></div>'+
+    (canSeeCreatorFee(a.id)?'<div><dt>人選合作費用（未稅）</dt><dd class="mono">'+esc(money((feeOf('creator',a.id)||{}).creatorFee))+'</dd></div>':'')+
+    (canSeeBrandFee()?'<div><dt>品牌合作費用（未稅）</dt><dd class="mono">'+esc(money((feeOf('brand',a.id)||{}).brandFee))+'</dd></div>':'')+
+    (b.note?'<div class="full"><dt>給人選的說明</dt><dd style="white-space:pre-wrap">'+esc(b.note)+'</dd></div>':'')+'</dl></section>';
+}
+function detailHTML(a){
+  var s=state.subs[a.id]||null,st=s?s.status:statusOf(a),editing=state.editing===a.id;
+  var h='<div class="dhead"><div class="dwho"><button class="btn sm ghost only-m" type="button" data-act="back" aria-label="回到名單">‹ 名單</button>'+avatar(a,true)+
+    '<div style="min-width:0"><h2>'+esc(a.name)+'</h2><div class="muted small">'+esc(a.platform||'')+(a.fans?' · 追蹤 '+esc(a.fans):'')+'</div></div></div>'+
+    '<div class="dstat">'+pill(st)+(s?'<span class="muted small mono">第 '+esc(s.rev)+' 版 · '+esc(fmt(s.updatedAt))+'</span>':'')+'</div></div>';
+  var dis=(state.busy||readOnly())?' disabled':'';
+  if(!state.briefs[a.id]&&!s){
+    return h+'<div class="empty"><h3>還沒開立交稿頁</h3><p>先設定談好的合作平台和必要標籤。開立後，'+esc(a.name)+' 登入就會看到預先勾好的交稿頁。</p>'+
+      '<button class="btn primary" type="button" data-act="openBrief" data-id="'+esc(a.id)+'"'+dis+'>開立交稿頁</button></div>';
+  }
+  h+=briefSummary(a,dis);
+  if(!s)return h+'<div class="empty"><h3>等待交稿</h3><p>'+esc(a.name)+' 還沒送出稿件。送出後會出現在這裡，審稿員就能編修。</p></div>';
+  h+='<section><div class="tool"><h3>'+(editing?'編修內容':'稿件內容')+'</h3>'+
+    (editing?'<span class="muted small">你的修改會用你的顏色標示</span>':'<div class="btns"><button class="btn sm" type="button" data-act="startEdit"'+dis+'>編修內容</button></div>')+'</div>'+
+    (editing?'<form id="sub-form" novalidate>'+formHTML('reviewer',s)+'</form>':contentHTML(s))+'</section>';
+  return h+payPanel(a,s)+contractPanel(a,s)+reviewPanel(a,s)+closePanel(a,s)+historyHTML(s);
+}
+/* ---------- 待辦摘要 ---------- */
+function tilesHTML(list){
+  var pend=[],conf=[],data=[],pay=[];
+  list.forEach(function(a){
+    var s=state.subs[a.id],st=statusOf(a),c=closeState(s);
+    if(st==='pending')pend.push(a);
+    if(st==='confirming')conf.push(a);
+    if(c.k==='submitted')data.push(a);
+    if(c.k==='closed'&&!c.paid)pay.push(a);
+  });
+  function sub(arr){return arr.length?esc(arr[0].name)+(arr.length>1?' 等 '+arr.length+' 位':''):'目前沒有';}
+  function tile(label,arr,attrs){
+    return '<button class="tile'+(arr.length?'':' zero')+'" type="button"'+(arr.length?attrs:' disabled')+'><span class="t-l">'+label+'</span><span class="t-n mono">'+arr.length+'</span><span class="t-s">'+sub(arr)+'</span></button>';
+  }
+  return '<div class="tiles" aria-label="待辦摘要">'+
+    tile('待審稿件',pend,' data-act="tile" data-k="pending"')+
+    tile('等人選確認',conf,' data-act="tile" data-k="confirming"')+
+    tile('數據待確認',data,' data-act="calOpen" data-id="'+(data[0]?esc(data[0].id):'')+'"')+
+    tile('待付款',pay,' data-act="calOpen" data-id="'+(pay[0]?esc(pay[0].id):'')+'"')+'</div>';
+}
+
+/* ---------- 月曆 ---------- */
+function pad2(n){return (n<10?'0':'')+n;}
+function ymd(y,m,d){return new Date(Date.UTC(y,m,d)).toISOString().slice(0,10);}
+function calInit(){
+  if(state.calY!=null)return;
+  var t=dfDay.format(Date.now()).split('-');
+  state.calY=+t[0];state.calM=+t[1]-1;state.calSel=t.join('-');
+}
+function calItems(){
+  var map={},un=[];
+  function add(k,it){(map[k]=map[k]||[]).push(it);}
+  creators().forEach(function(a){
+    var st=statusOf(a);
+    if(st==='unopened')return;
+    if(state.filter!=='all'&&st!==state.filter)return;
+    var s=state.subs[a.id],b=state.briefs[a.id],pd=s?s.publishDate:(b&&b.publishDate),title=s?rtext(s.title):'';
+    if(pd)add(pd,{kind:'post',cid:a.id,name:a.name,st:st,title:title,time:''});
+    else un.push({cid:a.id,name:a.name,st:st});
+    if(s&&s.story&&s.story.date)add(s.story.date,{kind:'story',cid:a.id,name:a.name,st:st,title:title,time:s.story.time||''});
+    var cs=closeState(s);
+    if((cs.k==='wait'||cs.k==='returned')&&cs.due)add(cs.due,{kind:'metrics',cid:a.id,name:a.name,st:st,late:cs.overdue,title:title,time:''});
+    if(cs.k==='closed'&&!cs.paid&&payDue(s))add(payDue(s),{kind:'pay',cid:a.id,name:a.name,st:st,title:title,time:''});
+  });
+  if(state.campaign&&!isNaN(deadlineMs())){
+    add(dfDay.format(new Date(state.campaign.deadline)),{kind:'deadline',name:'截稿',time:toInput(state.campaign.deadline).slice(11)});
+  }
+  Object.keys(map).forEach(function(k){
+    map[k].sort(function(x,y){
+      var o={deadline:0,story:1,post:2,metrics:3,pay:4};
+      return (o[x.kind]-o[y.kind])||String(x.time||'99').localeCompare(String(y.time||'99'))||x.name.localeCompare(y.name,'zh-Hant');
+    });
+  });
+  return {map:map,un:un};
+}
+function calChip(it,key){
+  if(it.kind==='deadline')return '<span class="cchip dl" title="截稿時間 '+esc(it.time)+'"><span class="ty">截</span>'+esc(it.time)+'</span>';
+  if(it.kind==='metrics'||it.kind==='pay'){
+    var tp=esc(it.name+(it.kind==='metrics'?'：結案數據繳交期限'+(it.late?'（已逾期）':''):'：合約付款日（尚未付款）'));
+    return '<button type="button" class="cchip '+(it.kind==='metrics'?'met'+(it.late?' late':''):'pay')+'" data-act="calOpen" data-id="'+esc(it.cid)+'" title="'+tp+'" aria-label="'+tp+'">'+
+      '<span class="ty">'+(it.kind==='metrics'?'數':'付')+'</span><span class="t">'+esc(it.name)+'</span></button>';
+  }
+  var tip=esc(it.name+(it.kind==='story'?' 限動 '+it.time:' 貼文')+'・'+ST[it.st]);
+  return '<button type="button" class="cchip st-'+it.st+(it.kind==='story'?' story':'')+'" data-act="calOpen" data-id="'+esc(it.cid)+'" title="'+tip+'" aria-label="'+tip+'">'+
+    '<span class="ty">'+(it.kind==='story'?'限':'貼')+'</span><span class="t">'+(it.kind==='story'&&it.time?esc(it.time)+' ':'')+esc(it.name)+'</span></button>';
+}
+function calendarView(){
+  calInit();
+  var y=state.calY,m=state.calM,cal=calItems(),map=cal.map,today=dfDay.format(Date.now());
+  var lead=new Date(Date.UTC(y,m,1)).getUTCDay(),days=new Date(Date.UTC(y,m+1,0)).getUTCDate(),total=Math.ceil((lead+days)/7)*7;
+  var cells='',i;
+  for(i=0;i<total;i++){
+    var k=ymd(y,m,i-lead+1),dt=new Date(k+'T00:00:00Z'),inM=dt.getUTCMonth()===m,items=map[k]||[],cnt=items.filter(function(x){return x.kind!=='deadline';}).length;
+    var show=items.slice(0,3),more=items.length-show.length;
+    cells+='<div class="cal-cell'+(inM?'':' out')+(k===today?' today':'')+(k===state.calSel?' sel':'')+(i%7===0||i%7===6?' wk':'')+'" role="gridcell">'+
+      '<button type="button" class="cal-day" data-act="calDay" data-d="'+k+'" aria-label="'+(dt.getUTCMonth()+1)+'月'+dt.getUTCDate()+'日，'+cnt+' 項排程">'+dt.getUTCDate()+'</button>'+
+      '<div class="cal-items">'+show.map(function(it){return calChip(it,k);}).join('')+
+      (more>0?'<button type="button" class="cmore" data-act="calDay" data-d="'+k+'">還有 '+more+' 項</button>':'')+'</div></div>';
+  }
+  var dows=['日','一','二','三','四','五','六'].map(function(d){return '<div class="cal-dow" role="columnheader">'+d+'</div>';}).join('');
+  var prefix=y+'-'+pad2(m+1)+'-',inMonth=Object.keys(map).filter(function(k){return k.indexOf(prefix)===0&&map[k].some(function(x){return x.kind!=='deadline';});}).length;
+  var hint='';
+  if(!inMonth){
+    var future=Object.keys(map).filter(function(k){return map[k].some(function(x){return x.kind!=='deadline';});}).sort();
+    if(future.length){
+      var pick=future.filter(function(k){return k>=prefix;})[0]||future[future.length-1],py=+pick.slice(0,4),pm=+pick.slice(5,7)-1;
+      hint='<p class="muted small" style="margin-top:10px">這個月沒有排程。<button class="btn sm" type="button" data-act="calGo" data-y="'+py+'" data-m="'+pm+'">前往 '+py+' 年 '+(pm+1)+' 月</button></p>';
+    }else hint='<p class="muted small" style="margin-top:10px">還沒有排程。人選的預計發布日和限動日期設定後，會出現在月曆上。</p>';
+  }
+  var sel=state.calSel,selItems=sel?(map[sel]||[]):[];
+  var panel='';
+  if(sel){
+    var sd=new Date(sel+'T00:00:00Z');
+    panel='<section class="card pad cal-panel"><h3>'+esc(fmtDay(sel))+'</h3>'+
+      (selItems.length?'<ul class="list">'+selItems.map(function(it){
+        if(it.kind==='deadline')return '<li class="crow"><span class="pill st-none">截稿</span><span>截稿時間 '+esc(it.time)+'</span><span></span></li>';
+        if(it.kind==='metrics'||it.kind==='pay'){
+          return '<li><button type="button" class="crow" data-act="calOpen" data-id="'+esc(it.cid)+'"><span class="pill '+(it.kind==='metrics'?(it.late?'st-none':'st-confirmed'):'st-approved')+'">'+(it.kind==='metrics'?'結案數據':'付款')+'</span>'+
+            '<span><b style="font-weight:500">'+esc(it.name)+'</b> <span class="muted small">'+(it.kind==='metrics'?'繳交期限'+(it.late?'（已逾期）':''):'合約付款日，尚未付款')+'</span><br><span class="muted small">'+esc(it.title||'')+'</span></span><span class="muted small">查看 ›</span></button></li>';
+        }
+        return '<li><button type="button" class="crow" data-act="calOpen" data-id="'+esc(it.cid)+'"><span class="pill st-'+it.st+'"><span class="g" aria-hidden="true">'+GL[it.st]+'</span>'+esc(ST[it.st])+'</span>'+
+          '<span><b style="font-weight:500">'+esc(it.name)+'</b> <span class="muted small">'+(it.kind==='story'?'IG 限動'+(it.time?' '+esc(it.time):''):'貼文')+'</span><br><span class="muted small">'+esc(it.title||'尚未上傳稿件')+'</span></span><span class="muted small">查看 ›</span></button></li>';
+      }).join('')+'</ul>':'<p class="muted">這天沒有排程。</p>')+'</section>';
+  }
+  var un=cal.un.length?'<p class="muted small" style="margin-top:12px">尚未排定發布日：'+cal.un.map(function(u){return '<button type="button" class="btn sm" data-act="calOpen" data-id="'+esc(u.cid)+'" style="margin:2px 4px 2px 0">'+esc(u.name)+'</button>';}).join('')+'</p>':'';
+  return '<section class="card cal"><div class="cal-head"><div class="cal-nav"><button class="btn sm" type="button" data-act="calPrev" aria-label="上個月">‹</button>'+
+    '<h2>'+y+' 年 '+(m+1)+' 月</h2><button class="btn sm" type="button" data-act="calNext" aria-label="下個月">›</button></div>'+
+    '<button class="btn sm" type="button" data-act="calToday">今天</button></div>'+
+    '<div class="cal-grid" role="grid" aria-label="'+y+' 年 '+(m+1)+' 月">'+dows+cells+'</div>'+
+    '<div class="legend" style="margin-top:12px"><span class="lg"><span class="ty-demo">貼</span>貼文預計發布日</span><span class="lg"><span class="ty-demo dash">限</span>IG 限動（含時間）</span><span class="lg"><span class="ty-demo dl">截</span>截稿</span><span class="lg"><span class="ty-demo met">數</span>結案數據繳交期限</span><span class="lg"><span class="ty-demo pay">付</span>合約付款日</span><span class="muted">貼文與限動的顏色代表稿件狀態</span></div>'+
+    hint+un+'</section>'+panel;
+}
+function reviewerView(){
+  var c=state.campaign;
+  if(!c){
+    return '<main><div class="card empty" style="padding:48px 20px"><h3>還沒有專案資料</h3><p>共用資料庫目前是空的。可以先載入示範資料，看看完整流程。</p>'+
+      '<button class="btn primary" type="button" data-act="loadDemo"'+(state.busy||readOnly()?' disabled':'')+'>載入示範資料</button></div></main>';
+  }
+  ensureSel();
+  var list=creators(),counts={all:list.length,unopened:0,none:0,pending:0,confirming:0,confirmed:0,approved:0};
+  list.forEach(function(a){counts[statusOf(a)]++;});
+  var chips=['all','unopened','none','pending','confirming','confirmed','approved'].map(function(k){
+    return '<button class="chip" type="button" data-act="filter" data-v="'+k+'" aria-pressed="'+(state.filter===k)+'">'+(k==='all'?'全部':ST[k])+' <b>'+counts[k]+'</b></button>';
+  }).join('');
+  var pct=counts.all?Math.round(counts.approved/counts.all*100):0;
+  var a=acc(state.sel);
+  var closedN=list.filter(function(x){return closeState(state.subs[x.id]).k==='closed';}).length;
+  var attn=tilesHTML(list);
+  return '<main>'+campaignHead(true)+
+    '<div class="dash-head"><div><h2>合作人選</h2><p>洽談好人選後，先開立交稿頁，設定合作平台與必要標籤，再把帳號密碼交給對方。</p></div>'+
+    '<div class="dash-act"><div class="dash-btns">'+
+    (canDownload()?'<button class="btn" type="button" data-act="exportCsv"'+(state.busy?' disabled':'')+'>匯出匯款資料（CSV）</button>':'')+
+    '<button class="btn primary" type="button" data-act="newBrief"'+(state.busy||readOnly()?' disabled':'')+'>＋ 開立新的合作人選</button></div>'+
+    (canDownload()?'<p class="muted small">匯出的檔案不再受權限保護，請妥善保管。</p>':'')+'</div></div>'+
+    attn+
+    '<div class="seg-row"><div class="seg" role="group" aria-label="檢視方式">'+
+      '<button type="button" data-act="dash" data-v="cal" aria-pressed="'+(state.dash==='cal')+'">月曆</button>'+
+      '<button type="button" data-act="dash" data-v="list" aria-pressed="'+(state.dash!=='cal')+'">名單與稿件</button></div></div>'+
+    '<div class="bar"><div class="chips" role="group" aria-label="依狀態篩選">'+chips+'</div>'+
+    '<div class="prog"><span>已定稿 <span class="mono">'+counts.approved+' / '+counts.all+'</span>　已結案 <span class="mono">'+closedN+' / '+counts.approved+'</span></span><span class="prog-bar" aria-hidden="true"><i style="width:'+pct+'%"></i></span></div></div>'+
+    (state.dash==='cal'?calendarView():
+    '<div class="split" data-view="'+(state.mobileDetail?'detail':'list')+'">'+
+    '<aside class="card pane-list"><div class="search"><input id="q" type="search" placeholder="搜尋人選、平台或標題" aria-label="搜尋" value="'+esc(state.q)+'"></div><div id="list">'+listHTML()+'</div></aside>'+
+    '<section class="card pane-detail">'+(a?detailHTML(a):'')+'</section></div>')+
+    '<div class="foot">'+(allow('resetDemo')?'<button class="btn sm" type="button" data-act="reset"'+(state.busy||readOnly()?' disabled':'')+'>'+(state.resetArm?'再按一次，確認重設':'重設示範資料')+'</button>'+
+    '<p style="margin-top:10px">重設會清除所有稿件與新增的帳號。畫面中的人選、品牌與稿件皆為虛構的示範資料。</p>':'<p>畫面中的人選、品牌與稿件皆為虛構的示範資料。</p>')+'</div></main>';
+}
+
+/* ---------- 開立交稿頁 ---------- */
+function blankBriefForm(){return {name:'',id:'',pw:'',fans:'',platforms:[],platformOther:'',tags:'',publishDate:'',note:'',creatorFee:'',brandFee:'',payDays:'30',err:''};}
+function briefFormFrom(b,cid){
+  var cf=feeOf('creator',cid),bf=feeOf('brand',cid);
+  return {name:'',id:'',pw:'',fans:'',platforms:(b.platforms||[]).slice(),platformOther:b.platformOther||'',
+    tags:parseTags(b.requiredTags).join(' '),publishDate:b.publishDate||'',note:b.note||'',
+    creatorFee:cf&&cf.creatorFee!=null?String(cf.creatorFee):'',brandFee:bf&&bf.brandFee!=null?String(bf.brandFee):'',payDays:String(cf&&cf.payDays||30),err:''};
+}
+function briefFormView(){
+  var t=state.brief.target,a=t?acc(t):null,isNew=!t,dis=(state.busy||readOnly())?' disabled':'';
+  if(!state.brief.f)state.brief.f=blankBriefForm();
+  var f=state.brief.f;
+  var other=f.platforms.indexOf('其他')>=0?'<div class="fld"><label for="b-other">其他平台名稱</label><input id="b-other" data-bf="platformOther" maxlength="30" value="'+esc(f.platformOther)+'" placeholder="例如：YouTube、部落格"></div>':'';
+  return '<main class="bform"><div class="bar"><button class="btn sm" type="button" data-act="cancelBrief">‹ 回人選名單</button></div>'+
+    '<section class="card pad"><h1>'+(isNew?'開立新的合作人選':'合作設定：'+esc(a?a.name:''))+'</h1>'+
+    '<p class="muted">先把談好的合作內容設定好。人選登入後會看到已預勾的平台與預填的必要標籤，平台人選仍可自己調整，必要標籤則需要保留才能送出。</p>'+
+    '<form id="brief-form" novalidate>'+
+    (isNew?'<div class="sec"><h2>人選帳號</h2><div class="grid2">'+
+      '<div class="fld"><label for="b-name">顯示名稱</label><input id="b-name" data-bf="name" maxlength="20" value="'+esc(f.name)+'" placeholder="例如：小米的日常"></div>'+
+      '<div class="fld"><label for="b-fans"><span>追蹤數</span><span class="opt">選填</span></label><input id="b-fans" data-bf="fans" maxlength="12" value="'+esc(f.fans)+'" placeholder="例如：3.2 萬"></div>'+
+      '<div class="fld"><label for="b-id">登入帳號 <span class="opt">3–20 字，英文小寫、數字、- 或 _</span></label><input id="b-id" data-bf="id" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="20" value="'+esc(f.id)+'"></div>'+
+      '<div class="fld"><label for="b-pw">密碼 <span class="opt">至少 4 個字</span></label><input id="b-pw" data-bf="pw" autocomplete="off" maxlength="40" value="'+esc(f.pw)+'"></div></div></div>':'')+
+    '<div class="sec"><h2>合作內容</h2>'+
+      '<div class="fld"><div class="lbl">合作平台 <span class="opt">可複選，人選交稿時會預先勾好</span></div><div class="pf" role="group" aria-label="合作平台">'+
+        PLATFORMS.map(function(p,i){return '<label for="b-pf'+i+'"><input id="b-pf'+i+'" type="checkbox" data-bpf="'+esc(p)+'"'+(f.platforms.indexOf(p)>=0?' checked':'')+'>'+esc(p)+'</label>';}).join('')+'</div></div>'+other+
+      '<div class="fld"><label for="b-tags"><span>必要 hashtag</span><span class="opt">用空格分開，# 可省略</span></label><input id="b-tags" data-bf="tags" value="'+esc(f.tags)+'" placeholder="#晨嵐咖啡 #合作"></div>'+
+      '<div class="grid2"><div class="fld"><label for="b-date"><span>預計發布日</span><span class="opt">選填</span></label><select id="b-date" data-bf="publishDate">'+dateOpts(f.publishDate)+'</select></div></div>'+
+      '<div class="fld"><label for="b-note"><span>給人選的說明</span><span class="opt">選填，人選會在交稿頁看到</span></label><textarea id="b-note" data-bf="note" rows="4" placeholder="例如：請在文案最前面標示合作揭露。">\n'+esc(f.note)+'</textarea></div></div>'+
+    (allow('editFees')?'<div class="sec"><h2>費用（未稅）</h2><p class="muted small" style="margin-top:-8px">人選合作費用只有該人選和 LV 審稿員看得到。品牌合作費用只有審稿員看得到，人選看不到。人選要先有人選合作費用，才能確認合作條款並交稿。</p><div class="grid2">'+
+      '<div class="fld"><label for="b-cfee"><span>人選合作費用</span><span class="opt">給人選的報酬，新台幣</span></label><input id="b-cfee" data-bf="creatorFee" inputmode="numeric" autocomplete="off" maxlength="12" value="'+esc(f.creatorFee)+'" placeholder="例如：12000"></div>'+
+      '<div class="fld"><label for="b-bfee"><span>品牌合作費用</span><span class="opt">提報給客戶的價錢，新台幣</span></label><input id="b-bfee" data-bf="brandFee" inputmode="numeric" autocomplete="off" maxlength="12" value="'+esc(f.brandFee)+'" placeholder="例如：20000"></div>'+
+      '<div class="fld"><label for="b-days"><span>付款期限</span><span class="opt">定稿並發布後幾天內匯款</span></label><input id="b-days" data-bf="payDays" inputmode="numeric" maxlength="3" value="'+esc(f.payDays)+'"></div></div></div>':'')+
+    '<p class="err" role="alert">'+esc(f.err)+'</p>'+
+    '<div class="actions" style="margin-top:0"><button class="btn primary" type="submit"'+dis+'>'+(isNew?'開立並建立帳號':'儲存設定')+'</button><button class="btn" type="button" data-act="cancelBrief">取消</button></div>'+
+    '</form></section></main>';
+}
+async function saveBrief(){
+  var t=state.brief.target,f=state.brief.f,u=me(),isNew=!t;
+  var id=isNew?f.id.trim().toLowerCase():t,name=f.name.trim();
+  f.err='';
+  if(isNew){
+    if(!name)f.err='請填寫顯示名稱。';
+    else if(!/^[a-z0-9_-]{3,20}$/.test(id))f.err='登入帳號請用 3–20 個英文小寫、數字、- 或 _。';
+    else if(acc(id))f.err='這個帳號已經有人使用。';
+    else if(f.pw.length<4)f.err='密碼至少要 4 個字。';
+  }
+  if(!f.err){
+    if(!f.platforms.length)f.err='請至少勾選一個合作平台。';
+    else if(f.platforms.indexOf('其他')>=0&&!f.platformOther.trim())f.err='勾選「其他」時，請填寫平台名稱。';
+  }
+  var feeOn=allow('editFees'),cfv=null,bfv=null,days=30;
+  if(!f.err&&feeOn){
+    var cs=f.creatorFee.replace(/[,\s]/g,''),bs=f.brandFee.replace(/[,\s]/g,''),ds=String(f.payDays||'').trim();
+    if(cs&&!/^\d{1,9}$/.test(cs))f.err='人選合作費用請只填數字。';
+    else if(bs&&!/^\d{1,9}$/.test(bs))f.err='品牌合作費用請只填數字。';
+    else if(ds&&(!/^\d{1,3}$/.test(ds)||+ds<1||+ds>365))f.err='付款期限請填 1 到 365 天。';
+    else{cfv=cs?+cs:null;bfv=bs?+bs:null;days=ds?+ds:30;}
+  }
+  if(f.err){render();var el=$('#brief-form .err');if(el&&el.scrollIntoView)el.scrollIntoView({block:'center'});return;}
+  var pf=PLATFORMS.filter(function(p){return f.platforms.indexOf(p)>=0;}),po=pf.indexOf('其他')>=0?f.platformOther.trim():'';
+  var brief={creatorId:id,platforms:pf,platformOther:po,requiredTags:parseTags(f.tags).join(' '),publishDate:f.publishDate,note:f.note.trim(),by:u.id,at:new Date().toISOString()};
+  var ok=await guarded(async function(){
+    if(isNew){
+      var ex=await api.getAccount(id);if(ex)throw {userMsg:'這個帳號已經有人使用。'};
+      await api.putAccount(id,{id:id,name:name,role:'creator',pw:f.pw,hue:Math.floor(Math.random()*360),platform:pf[0]==='其他'?po:pf[0],fans:f.fans.trim()});
+    }
+    await api.putBrief(id,brief);
+    if(feeOn){
+      var now=new Date().toISOString(),oc=feeOf('creator',id),ob=feeOf('brand',id);
+      try{
+        if(cfv!=null){
+          var changed=!oc||oc.creatorFee!==cfv||(oc.payDays||30)!==days;
+          if(changed)await api.putCreatorFee(id,{creatorId:id,creatorFee:cfv,payDays:days,rev:(oc?oc.rev||1:0)+1,by:u.id,at:now});
+        }
+        if(bfv!=null||ob){
+          if(!ob||ob.brandFee!==bfv)await api.putBrandFee(id,{creatorId:id,brandFee:bfv,by:u.id,at:now});
+        }
+      }catch(e){throw {userMsg:'費用需要編輯者以上的分享權限才能儲存。'};}
+    }
+  },isNew?'已開立 '+name+'。請把帳號和密碼交給對方。':'已儲存合作設定');
+  if(ok){state.view='main';state.dash='list';state.sel=id;state.mobileDetail=true;state.filter='all';state.brief={target:null,f:null};render();}
+}
+
+/* ---------- 帳號管理 ---------- */
+function accountsView(){
+  var f=state.accForm,u=me(),dis=(state.busy||readOnly())?' disabled':'';
+  var used={};reviewers().forEach(function(r){used[r.hue]=1;});
+  var hue=f.hue!=null?f.hue:(HUES.filter(function(x){return !used[x.h];})[0]||HUES[0]).h;
+  function row(a){
+    var canDel=a.id!==u.id&&!(isRev(a)&&reviewers().length<=1);
+    var armed=state.delArm===a.id;
+    var lv=!isRev(a)?'':(a.id===u.id?'<div class="lvrow">'+lvBadge(a)+'<span class="muted small">不能調整自己的等級</span></div>':
+      '<div class="lvrow"><label class="muted small" for="lv-'+esc(a.id)+'" style="margin:0">等級</label><select id="lv-'+esc(a.id)+'" data-lv="'+esc(a.id)+'"'+dis+'>'+levelOpts(levelOf(a))+'</select></div>');
+    return '<li class="acc">'+avatar(a)+'<div><div class="nm">'+(isRev(a)?'<span class="ru" style="--h:'+a.hue+'">'+esc(a.name)+'</span>':esc(a.name))+(a.id===u.id?' <span class="muted small">（你）</span>':'')+'</div>'+
+      '<div class="sub">'+esc(a.id)+(a.platform?' · '+esc(a.platform):'')+'</div>'+lv+'</div>'+
+      (canDel?'<button class="btn sm" type="button" data-act="delAcc" data-id="'+esc(a.id)+'"'+dis+'>'+(armed?(isRev(a)?'再按一次移除':'再按一次移除帳號與稿件'):'移除')+'</button>':'<span></span>')+'</li>';
+  }
+  var hueChips=HUES.map(function(x){
+    return '<label><input type="radio" name="hue" data-af="hue" value="'+x.h+'"'+(x.h===hue?' checked':'')+'><i class="sw" style="--h:'+x.h+'"></i>'+x.n+'</label>';
+  }).join('');
+  return '<main><div class="bar"><h1 style="font:700 24px/1.3 var(--f-serif)">帳號管理</h1></div><div class="accgrid">'+
+    '<section class="card pad"><h2>新增帳號</h2><form id="acc-form" novalidate>'+
+    '<div class="fld"><label for="a-role">角色</label><select id="a-role" data-af="role"><option value="reviewer"'+(f.role==='reviewer'?' selected':'')+'>審稿員</option><option value="creator"'+(f.role==='creator'?' selected':'')+'>合作人選</option></select></div>'+
+    '<div class="fld"><label for="a-name">顯示名稱</label><input id="a-name" data-af="name" maxlength="20" value="'+esc(f.name)+'" placeholder="例如：陳編輯"></div>'+
+    '<div class="fld"><label for="a-id">登入帳號 <span class="opt">3–20 字，英文小寫、數字、- 或 _</span></label><input id="a-id" data-af="id" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="20" value="'+esc(f.id)+'"></div>'+
+    '<div class="fld"><label for="a-pw">密碼 <span class="opt">至少 4 個字</span></label><input id="a-pw" type="text" data-af="pw" autocomplete="off" maxlength="40" value="'+esc(f.pw)+'"></div>'+
+    (f.role==='reviewer'?'<div class="fld"><label for="a-level"><span>審稿員等級</span><span class="opt">L1 看不到匯款資料，LV 可查閱所有內容</span></label><select id="a-level" data-af="level">'+levelOpts(f.level)+'</select></div>'+
+      '<div class="fld"><div class="lbl">文字顏色 <span class="opt">這位審稿員修改的文字會用這個顏色</span></div><div class="hues" role="radiogroup" aria-label="文字顏色">'+hueChips+'</div></div>':
+      '<div class="fld"><label for="a-plat">主要平台</label><select id="a-plat" data-af="platform">'+PLATFORMS.concat(['YouTube','部落格']).map(function(p){return '<option'+(p===f.platform?' selected':'')+'>'+esc(p)+'</option>';}).join('')+'</select></div>')+
+    (f.role==='creator'?'<p class="muted small">這樣建立的人選會顯示為「待開立」，需要再到審稿頁設定合作平台與必要標籤。也可以直接用審稿頁的「開立新的合作人選」一次完成。</p>':'')+
+    '<p class="err" role="alert">'+esc(f.err)+'</p>'+
+    '<button class="btn primary" type="submit"'+dis+'>新增帳號</button>'+
+    '<p class="muted small">示範版的密碼會以明碼存在共用資料裡，請不要用你真正的密碼。</p></form></section>'+
+    '<section class="card pad"><h2>審稿員（'+reviewers().length+'）</h2><ul class="list">'+reviewers().map(row).join('')+'</ul>'+
+    '<h2>合作人選（'+creators().length+'）</h2><ul class="list">'+creators().map(row).join('')+'</ul>'+
+    '<h2>匯出紀錄</h2>'+auditHTML()+'</section></div></main>';
+}
+
+/* ---------- 人選 ---------- */
+function ensureDraft(s){
+  var id=me().id,rev=s?s.rev:0,b=state.briefs[id],bat=b?b.at:'';
+  if(!state.draft||state.draftId!==id||(!state.dirty&&(state.draftRev!==rev||(!s&&state.draftBriefAt!==bat)))){
+    state.draft=draftFrom(s,id);state.draftId=id;state.draftRev=rev;state.draftBriefAt=bat;state.dirty=false;
+  }
+}
+function closeFormHTML(s,cs){
+  var d=state.cdraft,dis=(state.busy||readOnly()||state.uploading>0)?' disabled':'';
+  var errs=d.errors.length?'<ul class="errs" role="alert">'+d.errors.map(function(e){return '<li>'+esc(e)+'</li>';}).join('')+'</ul>':'';
+  var h='<form id="close-form" novalidate>'+errs;
+  closeBlocks(s).forEach(function(b,i){
+    var x=d.blocks[b.key]||{views:'',inter:'',accounts:'',note:'',shots:[]},hint=METRIC_HINT[b.key==='story'?'story':(b.key)]||METRIC_HINT['其他'];
+    h+='<fieldset class="cblock"><legend>'+esc(b.label)+'</legend><div class="grid3">'+
+      [['views','瀏覽次數'],['inter','互動次數'],['accounts','互動帳號']].map(function(f){
+        return '<div class="fld"><label for="cm'+i+f[0]+'">'+f[1]+'</label><input id="cm'+i+f[0]+'" data-cm="'+esc(b.key)+'|'+f[0]+'" inputmode="numeric" autocomplete="off" maxlength="14" value="'+esc(x[f[0]])+'"><p class="muted small" style="margin-top:4px">'+esc(hint[f[0]])+'</p></div>';
+      }).join('')+'</div>'+
+      '<div class="fld" style="margin-top:14px"><label for="cm'+i+'note"><span>備註</span><span class="opt">選填，例如統計期間</span></label><input id="cm'+i+'note" data-cm="'+esc(b.key)+'|note" maxlength="80" value="'+esc(x.note)+'"></div>'+
+      '<div class="fld" style="margin-top:14px"><div class="lbl">後台數據截圖 <span class="opt">至少 1 張，最多 4 張，圖片檔</span></div>'+
+      (x.shots.length?'<div class="mats" style="margin-bottom:10px">'+x.shots.map(function(m,j){
+        return '<div class="shot">'+matHTML(m,null)+'<button class="btn sm" type="button" data-act="rmShot" data-k="'+esc(b.key)+'" data-i="'+j+'">移除</button></div>';}).join('')+'</div>':'')+
+      '<input id="cs'+i+'" type="file" accept="image/*" multiple data-cshot="'+esc(b.key)+'" aria-label="上傳'+esc(b.label)+'的截圖"></div></fieldset>';
+  });
+  h+='<div class="actions"><button class="btn primary" type="submit"'+dis+'>'+(cs.k==='submitted'?'重新送出數據':'送出結案數據')+'</button>'+
+    (cs.k==='submitted'?'<button class="btn" type="button" data-act="closeCancel">取消</button>':'')+
+    '<span class="muted small">送出後由審稿員確認，確認無誤即結案。</span></div></form>';
+  return h;
+}
+function closeCard(u,s){
+  if(!s)return '';
+  var cs=closeState(s);
+  if(cs.k==='na'){
+    return '<section class="card pad"><div class="tool"><h2 class="ch">結案數據</h2></div><p class="muted">稿件定稿並發布後，請在曝光後 14 日內回來上傳結案數據（預計 '+esc(fmtDay(metricsDue(s)))+' 前）。需要填寫各平台貼文與 IG 限動的瀏覽次數、互動次數、互動帳號，並附上後台數據截圖。</p></section>';
+  }
+  ensureCDraft(s);
+  var d=state.cdraft,c=cs.c;
+  var h='<section class="card pad" id="close-card"><div class="tool"><h2 class="ch">結案數據</h2><span class="ctag c-'+cs.k+(cs.overdue?' late':'')+'">'+esc(CL[cs.k])+(cs.overdue?'・逾期':'')+'</span></div>'+
+    '<p class="muted small" style="margin-bottom:12px">曝光日 '+esc(fmtDay(exposureEnd(s)))+'，請在 '+esc(fmtDay(cs.due))+' 前上傳（曝光後 14 日內）。'+(cs.overdue?'<b style="color:var(--bad)">已逾期，仍可上傳，但會標示逾期。</b>':'')+'</p>';
+  if(cs.k==='returned'&&c.review)h+='<div class="note-box st-confirming"><div class="who">審稿員退回補件 · '+esc(nameOf(c.review.by))+' · '+esc(fmt(c.review.at))+'</div><p>'+esc(c.review.note||'')+'</p></div>';
+  if(cs.k==='closed'){
+    var due=payDue(s),n=(s.contract&&s.contract.payDays)||30;
+    h+=blocksSummaryHTML(s,c)+'<div class="note-box st-approved" style="margin-top:12px"><div class="who">已結案 · '+esc(fmt(c.closedAt))+'</div><p>合約付款日：'+esc(fmtDay(due))+'（發布日起 '+esc(n)+' 天）。'+
+      (c.paid?'已於 '+esc(fmtDay(c.paid.date))+' 付款。':'款項會依合約日期匯入你提供的帳戶。')+'</p></div>';
+  }else if(cs.k==='submitted'&&!d.edit){
+    h+=blocksSummaryHTML(s,c)+'<p class="muted small" style="margin-top:4px">已於 '+esc(fmt(c.submittedAt))+' 送出，等審稿員確認。'+(c.late?'（逾期上傳）':'')+'</p>'+
+      '<div style="margin-top:10px"><button class="btn sm" type="button" data-act="closeEdit">更新數據</button></div>';
+  }else{
+    h+=closeFormHTML(s,cs);
+  }
+  return h+'</section>';
+}
+function creatorView(){
+  var c=state.campaign,u=me();
+  if(!c)return '<main class="cmain"><div class="card empty" style="padding:48px 20px"><h3>專案還沒建立</h3><p>請通知審稿員先建立專案，之後就能在這裡上傳稿件。</p></div></main>';
+  var s=state.subs[u.id]||null,br=state.briefs[u.id]||null,st=s?s.status:(br?'none':'unopened'),closed=isClosed();
+  if(!s&&!br){
+    return '<main class="cmain">'+campaignHead(false)+
+      '<section class="card pad status-card"><div class="sc-top"><span class="eyebrow">你的稿件</span>'+pill('unopened')+'</div>'+
+      '<p style="margin-top:10px">審稿員還沒有開立你的交稿頁。開立後，這裡會出現交稿表單，平台和必要標籤都會先幫你設定好。請稍後再回來看看。</p></section></main>';
+  }
+  ensureDraft(s);
+  var h='<main class="cmain">'+campaignHead(false)+
+    (br?'<section class="card pad briefcard"><h2>審稿員為你設定的合作內容</h2><dl class="meta"><div><dt>合作平台</dt><dd>'+briefPlatforms(br)+'</dd></div>'+
+      '<div><dt>預計發布日</dt><dd class="mono">'+esc(fmtDay(br.publishDate))+'</dd></div>'+
+      '<div class="full"><dt>必要標籤（送出時需要包含）</dt><dd>'+(parseTags(br.requiredTags).length?tagChips(parseTags(br.requiredTags),'req'):'<span class="muted">沒有指定</span>')+'</dd></div>'+
+      '<div><dt>人選合作費用（未稅）</dt><dd class="mono">'+esc(money((feeOf('creator',u.id)||{}).creatorFee))+'</dd></div>'+
+      (br.note?'<div class="full"><dt>說明</dt><dd style="white-space:pre-wrap">'+esc(br.note)+'</dd></div>':'')+'</dl>'+
+      '<p class="muted small" style="margin-top:12px">平台已經先幫你勾好，如果實際發布的平台不同，可以在交稿時自行調整。</p></section>':'')+
+    '<section class="card pad status-card"><div class="sc-top"><span class="eyebrow">你的稿件</span>'+pill(st)+(s?'<span class="muted small mono">第 '+esc(s.rev)+' 版 · 最後更新 '+esc(fmt(s.updatedAt))+'</span>':'')+'</div>'+
+    (!s?'<p class="muted" style="margin-top:10px">還沒有上傳稿件。截稿前可以隨時送出，送出後也能再更新。</p>':
+      (st==='pending'?'<p class="muted" style="margin-top:10px">稿件已送出，等審稿員檢視。審稿員會直接編修，需要你確認時會通知你。</p>':
+      (st==='confirmed'?'<p class="muted" style="margin-top:10px">你已確認編修內容，等審稿員定稿。</p>':
+      (st==='approved'?'<p class="muted" style="margin-top:10px">稿件已定稿。發布後請在曝光後 14 日內，到下方上傳結案數據。</p>':''))))+'</section>';
+  if(s&&st==='confirming'&&s.notice){
+    var n=s.notice,edits=s.reviewerEdits.length?s.reviewerEdits:(n.fields||[]);
+    h+='<section class="card pad notice" role="status"><div class="n-top"><span class="eyebrow">審稿員通知</span>'+nameTag(n.by)+'<span class="muted small mono">'+esc(fmt(n.at))+'</span></div>'+
+      '<h2>稿件已編修，請查看並確認</h2>'+(n.message?'<div class="note-box"><p>'+esc(n.message)+'</p></div>':'')+
+      (edits.length?'<p class="muted small">修改過：'+esc(fieldsText(edits))+'。下方稿面用不同顏色標出是誰改的。</p>':'')+
+      '<div class="acts"><button class="btn primary" type="button" data-act="confirm"'+(state.busy||readOnly()?' disabled':'')+'>確認無誤</button>'+
+      (closed?'':'<button class="btn" type="button" data-act="gotoForm">我要再修改</button>')+'</div></section>';
+  }
+  if(s)h+=closeCard(u,s);
+  if(s)h+='<section class="card pad"><div class="tool"><h3>目前稿面</h3></div>'+contentHTML(s)+'</section>';
+  if(closed){
+    h+='<div class="banner bad">已截稿，稿件已鎖定，無法再更新。如需調整，請聯絡審稿員。</div>';
+    if(!s)h+='<div class="card empty"><h3>截稿前沒有收到稿件</h3><p>如果還想參與這次合作，請聯絡審稿員。</p></div>';
+  }else{
+    h+='<form id="sub-form" class="card pad" novalidate><h2 style="font:700 18px var(--f-serif);margin-bottom:14px">'+(s?'更新稿件':'上傳稿件')+'</h2>'+formHTML('creator',s)+'</form>';
+  }
+  if(s)h+='<div class="card pad">'+historyHTML(s)+'</div>';
+  h+='<section class="card pad points-card"><h3>審稿重點</h3><ul>'+CHECKS.map(function(t){return '<li>'+esc(t)+'</li>';}).join('')+'</ul></section>';
+  return h+'<p class="foot">畫面中的人選、品牌與稿件皆為虛構的示範資料。</p></main>';
+}
+
+/* ---------- 繪製 ---------- */
+function viewHTML(){
+  if(state.mode==='init'||!state.loaded)return '<div class="boot">'+(state.mode==='init'?'連線中…':'讀取資料中…')+'</div>';
+  var u=me();
+  if(!u)return loginView();
+  if(isRev(u)&&state.view==='accounts'&&!allow('manageAccounts'))state.view='main';
+  return topbar()+banners()+(isRev(u)?(state.view==='accounts'?accountsView():(state.view==='brief'?briefFormView():reviewerView())):creatorView());
+}
+function hydrate(){
+  document.querySelectorAll('img[data-pfid]').forEach(function(img){
+    var fid=img.dataset.pfid,uid=img.dataset.pfuid;
+    if(payCache[fid]){if(!img.getAttribute('src'))img.src=payCache[fid];return;}
+    if(payLoading[fid]||!api)return;
+    payLoading[fid]=true;
+    api.getPayFile(uid,fid).then(function(f){
+      if(f&&f.data){payCache[fid]=f.data;document.querySelectorAll('img[data-pfid="'+fid+'"]').forEach(function(i){i.src=f.data;});}
+      else payLoading[fid]=false;
+    }).catch(function(){payLoading[fid]=false;});
+  });
+  document.querySelectorAll('img[data-fid]').forEach(function(img){
+    var id=img.dataset.fid;
+    if(fileCache[id]){if(!img.getAttribute('src'))img.src=fileCache[id];return;}
+    if(fileLoading[id]||!api)return;
+    fileLoading[id]=true;
+    api.getFile(id).then(function(f){
+      if(f&&f.data){fileCache[id]=f.data;document.querySelectorAll('img[data-fid="'+id+'"]').forEach(function(i){i.src=f.data;});}
+    }).catch(function(){fileLoading[id]=false;});
+  });
+}
+/* ---------- 費用與合約 ---------- */
+function money(n){return (n==null||n==='')?'尚未設定':'NT$ '+Number(n).toLocaleString('en-US');}
+function feeOf(kind,cid){return (kind==='brand'?state.bfees:state.cfees)[cid]||null;}
+function canSeeCreatorFee(cid){var u=me();return !!u&&((u.role==='creator'&&u.id===cid)||allow('viewCreatorFee'));}
+function canSeeBrandFee(){return allow('viewBrandFee');}
+function platText(b){
+  var p=[];
+  (b.platforms||[]).forEach(function(n){p.push(n==='其他'&&b.platformOther?b.platformOther:n);});
+  return p.join('、')||'依合作設定';
+}
+function contractCtx(cid,cf){
+  var b=state.briefs[cid]||{},t=parseTags(b.requiredTags).join(' ');
+  return {brand:(state.campaign&&state.campaign.brand)||'品牌方',platforms:platText(b),tags:t||'無指定',
+    deadline:state.campaign?fmtFull(state.campaign.deadline):'截稿時間',
+    fee:Number(cf.creatorFee).toLocaleString('en-US'),payDays:cf.payDays||30};
+}
+function contractState(cid,s){
+  var cf=feeOf('creator',cid),has=!!(cf&&cf.creatorFee!=null),c=s&&s.contract;
+  var ok=!!(has&&c&&c.version===CONTRACT.version&&c.feeRev===cf.rev);
+  return {cf:cf,hasFee:has,accepted:ok,stale:!!(c&&has&&!ok)};
+}
+/* ---------- 結案數據 ---------- */
+function todayStr(){return dfDay.format(Date.now());}
+function addDays(d,n){var x=new Date(d+'T00:00:00Z');x.setUTCDate(x.getUTCDate()+n);return x.toISOString().slice(0,10);}
+function exposureEnd(s){var a=s.publishDate||'',b=(s.story&&s.story.date)||'';return a>b?a:b;}
+function metricsDue(s){var e=exposureEnd(s);return e?addDays(e,14):'';}
+function payDue(s){var e=exposureEnd(s),n=(s.contract&&s.contract.payDays)||30;return e?addDays(e,n):'';}
+function closeState(s){
+  if(!s||s.status!=='approved')return {k:'na'};
+  var c=s.close,due=metricsDue(s),t=todayStr();
+  if(!c)return {k:'wait',due:due,overdue:!!due&&t>due};
+  return {k:c.status,due:due,c:c,late:!!c.late,paid:!!c.paid,overdue:c.status==='returned'&&!!due&&t>due};
+}
+function closeBlocks(s){
+  var out=[];
+  PLATFORMS.forEach(function(p){
+    if(s.platforms.indexOf(p)>=0)out.push({key:p,label:(p==='其他'?(s.platformOther||'其他平台'):p)+' 貼文'});
+  });
+  if(s.story&&s.story.date)out.push({key:'story',label:'Instagram 限動'});
+  return out;
+}
+function nfmt(n){return (n==null||n==='')?'—':Number(n).toLocaleString('en-US');}
+function closeTag(a){
+  var s=state.subs[a.id],cs=closeState(s);
+  if(cs.k==='na')return '';
+  var label=CL[cs.k]+(cs.k==='closed'&&cs.paid?'・已付款':'')+(cs.overdue?'・逾期':'');
+  return '<span class="ctag c-'+cs.k+(cs.overdue?' late':'')+'">'+esc(label)+'</span>';
+}
+function blocksSummaryHTML(s,c){
+  var blocks=closeBlocks(s);
+  return blocks.map(function(b){
+    var d=(c.blocks||{})[b.key]||{};
+    return '<div class="mblock"><h4>'+esc(b.label)+'</h4><dl class="meta m3"><div><dt>瀏覽次數</dt><dd class="mono">'+nfmt(d.views)+'</dd></div>'+
+      '<div><dt>互動次數</dt><dd class="mono">'+nfmt(d.inter)+'</dd></div><div><dt>互動帳號</dt><dd class="mono">'+nfmt(d.accounts)+'</dd></div></dl>'+
+      (d.note?'<p class="muted small" style="margin-bottom:8px;white-space:pre-wrap">'+esc(d.note)+'</p>':'')+matsHTML(d.shots||[])+'</div>';
+  }).join('');
+}
+var watchSig='',unsubs=[];
+function setupWatches(){
+  var u=me(),sig=u?u.id+'|'+u.role+'|'+levelOf(u):'';
+  if(sig===watchSig)return;
+  watchSig=sig;
+  if(!api||api.mode!=='shared')return;
+  unsubs.forEach(function(f){try{f();}catch(e){}});unsubs=[];
+  state.cfees={};state.bfees={};
+  if(!u)return;
+  if(isRev(u)){
+    if(allow('viewCreatorFee'))unsubs.push(api.watchFees('creator',null,function(m){state.cfees=m;scheduleRender();}));
+    if(allow('viewBrandFee'))unsubs.push(api.watchFees('brand',null,function(m){state.bfees=m;scheduleRender();}));
+  }else{
+    unsubs.push(api.watchFees('creator',u.id,function(m){state.cfees=m;scheduleRender();}));
+  }
+}
+
+/* ---------- 匯出（只有 LV） ---------- */
+function canDownload(){return allow('exportPay')&&(!!state.dl||state.mode==='local');}
+function dataUrlToBlob(u){
+  var m=/^data:([^;,]+)((?:;[^,]*)?),([\s\S]*)$/.exec(u||'');
+  if(!m)return null;
+  if(/;base64/.test(m[2])){
+    var bin=atob(m[3]),arr=new Uint8Array(bin.length);
+    for(var i=0;i<bin.length;i++)arr[i]=bin.charCodeAt(i);
+    return new Blob([arr],{type:m[1]});
+  }
+  return new Blob([decodeURIComponent(m[3])],{type:m[1]});
+}
+function extOf(mime){return {'image/jpeg':'jpg','image/png':'png','image/svg+xml':'svg','image/webp':'webp','image/gif':'gif'}[mime]||'jpg';}
+function safeName(s){return String(s).replace(/[\\\/:*?"<>|]+/g,'').replace(/\s+/g,' ').trim();}
+function csvCell(v){
+  v=String(v==null?'':v);
+  if(/^[=+\-@\t\r]/.test(v)&&!/^="\d+"$/.test(v))v="'"+v;
+  return '"'+v.replace(/"/g,'""')+'"';
+}
+function digitCell(d){d=String(d||'');return /^\d+$/.test(d)?'="'+d+'"':d;}
+async function saveFile(name,data){
+  if(state.dl)return state.dl.save({filename:name,data:data});
+  var blob=data instanceof Blob?data:new Blob([data],{type:'text/plain'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;
+  document.body.appendChild(a);a.click();
+  setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},1500);
+  return {status:'saved'};
+}
+async function saveOrThrow(name,data){
+  try{return await saveFile(name,data);}
+  catch(e){
+    var c=e&&e.code;
+    if(c==='declined')throw {cancelled:true,msg:'已取消下載。'};
+    if(c==='rate_limited')throw {userMsg:'操作太頻繁，請稍後再試。'};
+    if(c==='too_large')throw {userMsg:'檔案太大，無法下載。'};
+    throw {userMsg:'目前的環境無法下載檔案。'};
+  }
+}
+async function logExport(ev){
+  try{
+    var cur=(await api.getAudit())||{events:[]};
+    cur.events=[Object.assign({at:new Date().toISOString(),by:me().id},ev)].concat(cur.events||[]).slice(0,50);
+    await api.putAudit(cur);
+    state.audit=null;
+    if(state.view==='accounts')scheduleRender();
+  }catch(e){}
+}
+async function exportCsv(){
+  if(!canDownload())return;
+  var list=creators().filter(function(a){var s=state.subs[a.id];return s&&s.pay;});
+  if(!list.length){toast('目前沒有人選提供匯款資料。','err');return;}
+  var n=0,msg='';
+  var ok=await guarded(async function(){
+    var rows=[['人選','登入帳號','銀行名稱','銀行代碼','銀行帳號','人選合作費用（未稅）','品牌合作費用（未稅）','合約版本','合約確認時間','匯款資料更新時間','結案狀態','合約付款日','付款狀態']],miss=0;
+    for(var i=0;i<list.length;i++){
+      var s=state.subs[list[i].id],d=null,cid=list[i].id;
+      try{d=await api.getPay(s.pay.uid,cid);}catch(e){}
+      if(!d){miss++;continue;}
+      var cfv=(feeOf('creator',cid)||{}).creatorFee,bfv=(feeOf('brand',cid)||{}).brandFee;
+      rows.push([list[i].name,cid,d.bankName,digitCell(d.bankCode),digitCell(d.bankAccount),cfv==null?'':cfv,bfv==null?'':bfv,
+        s.contract?'v'+s.contract.version:'未確認',s.contract?toInput(s.contract.at).replace('T',' '):'',toInput(d.at).replace('T',' '),
+        (function(){var k=closeState(s);return k.k==='na'?'尚未定稿':CL[k.k]+(k.late?'（逾期上傳）':'');})(),
+        s.status==='approved'?payDue(s):'',
+        (s.close&&s.close.paid)?'已付款 '+s.close.paid.date:(s.close&&s.close.status==='closed'?'尚未付款':'未結案')]);
+    }
+    if(rows.length===1)throw {userMsg:'讀不到匯款資料。可能是權限不足，需要編輯者以上的分享權限。'};
+    var csv='﻿'+rows.map(function(r){return r.map(csvCell).join(',');}).join('\r\n');
+    await saveOrThrow('匯款資料-'+dfDay.format(Date.now())+'.csv',csv);
+    n=rows.length-1;
+    msg=miss?'已下載 '+n+' 位。另有 '+miss+' 位讀不到，沒有列入。':'已下載 '+n+' 位人選的匯款資料';
+  });
+  if(ok&&n){toast(msg);logExport({type:'csv',n:n});}
+}
+async function dlPayImage(k){
+  var id=state.sel,a=acc(id),v=state.payView[id];
+  if(!canDownload()||!a||!v||!v.data)return;
+  var f=v.data.files&&v.data.files[k];if(!f)return;
+  var label=safeName((PAYFILES.filter(function(x){return x[0]===k;})[0]||['',k])[1].replace(/（.*?）/g,''));
+  var ok=await guarded(async function(){
+    var data=payCache[f.fid];
+    if(!data){var pf=await api.getPayFile(v.data.uid,f.fid);data=pf&&pf.data;if(data)payCache[f.fid]=data;}
+    var blob=dataUrlToBlob(data);
+    if(!blob)throw {userMsg:'讀不到這張圖片。'};
+    await saveOrThrow(safeName(a.name)+'-'+label+'.'+extOf(blob.type),blob);
+  },'已下載圖片');
+  if(ok)logExport({type:'image',target:id,label:label});
+}
+function loadAudit(){
+  if(!api||state.view!=='accounts'||!allow('manageAccounts')||state.audit)return;
+  state.audit={loading:true};
+  api.getAudit().then(function(d){state.audit={events:(d&&d.events)||[]};scheduleRender();})
+    .catch(function(){state.audit={events:[]};scheduleRender();});
+}
+function auditHTML(){
+  var a=state.audit;
+  if(!a||a.loading)return '<p class="muted small">讀取中…</p>';
+  if(!a.events.length)return '<p class="muted small">還沒有人匯出過匯款資料。</p>';
+  return '<ul class="list">'+a.events.slice(0,20).map(function(e){
+    return '<li class="aud">'+nameTag(e.by)+'<span>'+(e.type==='csv'?'匯出匯款清單（'+esc(e.n)+' 人）':'下載 '+esc(nameOf(e.target))+' 的'+esc(e.label))+'</span><span class="muted small mono">'+esc(fmt(e.at))+'</span></li>';
+  }).join('')+'</ul>';
+}
+function payKey(s){return (s.pay?s.pay.at:'')+'|'+(s.contract?s.contract.at:'');}
+function loadPay(){
+  if(!api||!state.loaded||!allow('viewPay')||state.view!=='main'||state.dash==='cal')return;
+  var id=state.sel,s=id&&state.subs[id];
+  if(!s||(!s.pay&&!s.contract))return;
+  var key=payKey(s),v=state.payView[id];
+  if(v&&v.at===key)return;
+  state.payView[id]={at:key,loading:true};
+  Promise.all([
+    s.pay?api.getPay(s.pay.uid,id).catch(function(){return null;}):Promise.resolve(null),
+    s.contract?api.getContract(s.contract.uid,id).catch(function(){return null;}):Promise.resolve(null)
+  ]).then(function(r){
+    state.payView[id]={at:key,data:r[0],contract:r[1]};scheduleRender();
+  });
+}
+function render(){
+  clearTimeout(rt);
+  if(composing){pendingRender=true;return;}
+  pendingRender=false;
+  setupWatches();
+  var root=$('#app'),a=document.activeElement,fid=null,ss=null,se=null;
+  if(a&&root.contains(a)&&a.id){fid=a.id;try{ss=a.selectionStart;se=a.selectionEnd;}catch(e){}}
+  var sc=document.scrollingElement,top=sc?sc.scrollTop:0;
+  root.innerHTML=viewHTML();
+  if(sc)sc.scrollTop=top;
+  if(fid){
+    var n=document.getElementById(fid);
+    if(n){try{n.focus({preventScroll:true});if(ss!=null&&n.setSelectionRange)n.setSelectionRange(ss,se);}catch(e){}}
+  }
+  lastClosed=state.campaign?isClosed():null;
+  hydrate();loadPay();loadAudit();
+}
+function scheduleRender(){clearTimeout(rt);rt=setTimeout(render,0);}
+
+/* ---------- 動作 ---------- */
+async function guarded(fn,okMsg){
+  if(state.busy)return false;
+  state.busy=true;render();
+  var ok=false;
+  try{
+    await fn();ok=true;if(okMsg)toast(okMsg);
+  }catch(e){
+    if(e&&e.cancelled)toast(e.msg||'已取消。');
+    else if(e&&e.userMsg)toast(e.userMsg,'err');
+    else if(e&&e.code==='invalid_argument'){state.canWrite=false;toast('這個帳號沒有寫入權限，無法儲存。','err');}
+    else toast('儲存失敗，請稍後再試。','err');
+  }
+  state.busy=false;render();return ok;
+}
+function resetView(){
+  state.sel=null;state.mobileDetail=false;state.filter='all';state.q='';state.view='main';state.dash='cal';state.calY=null;
+  state.draft=null;state.draftId=null;state.draftRev=-1;state.dirty=false;state.editing=null;state.errors=[];
+  state.review={};state.msg={};state.reviewErr='';state.dlOpen=false;state.resetArm=false;state.delArm=null;
+  state.brief={target:null,f:null};state.payView={};state.audit=null;state.cdraft=null;state.cmsg={};state.cerr='';
+}
+function doLogin(){
+  var id=($('#login-id').value||'').trim().toLowerCase(),pw=$('#login-pw').value||'';
+  state.loginId=id;
+  var a=accounts().filter(function(x){return x.id===id&&x.pw===pw;})[0];
+  if(!a){state.loginErr='帳號或密碼不正確，請再確認一次。';state.loginPw='';render();return;}
+  state.userId=a.id;state.loginErr='';state.loginPw='';resetView();
+  try{sessionStorage.setItem(SK,a.id);}catch(e){}
+  render();
+}
+function doLogout(){
+  state.userId=null;state.loginId='';state.loginPw='';state.loginErr='';resetView();
+  try{sessionStorage.removeItem(SK);}catch(e){}
+  render();
+}
+function validateDraft(d,isR,id){
+  var e=[];
+  var b=state.briefs[id];
+  if(!isR&&b&&b.requiredTags){
+    var m=missingTags(d.tags,b.requiredTags);
+    if(m.length)e.push('標籤缺少必要項目：'+m.join(' ')+'。');
+  }
+  if(!d.title.trim())e.push('請填寫稿件標題。');
+  if(!d.platforms.length)e.push('請至少勾選一個發布社群平台。');
+  else if(d.platforms.indexOf('其他')>=0&&!d.platformOther.trim())e.push('勾選「其他」時，請填寫平台名稱。');
+  if(!d.publishDate)e.push('請選擇預計發布日。');
+  if(wc(d.body)<30)e.push('文案內文至少需要 30 字（目前 '+wc(d.body)+' 字）。');
+  if(!isR&&d.payEdit){
+    var p=d.pay,code=p.bankCode.trim(),acct=p.bankAccount.replace(/[\s-]/g,'');
+    if(!p.bankName.trim())e.push('請填寫銀行名稱。');
+    if(!/^\d{3}(\d{4})?$/.test(code))e.push('銀行代碼請填 3 碼數字（含分行代碼為 7 碼）。');
+    if(!/^\d{6,20}$/.test(acct))e.push('銀行帳號請只填數字（6–20 碼）。');
+    PAYFILES.forEach(function(x){if(!p.files[x[0]])e.push('請上傳'+x[1]+'。');});
+    if(state.mode==='shared'&&!state.uid)e.push('目前無法確認登入身分，暫時不能儲存匯款資料。');
+  }
+  if(!isR){
+    var cst=contractState(id,state.subs[id]||null);
+    if(!cst.hasFee)e.push('人選合作費用還沒有設定，審稿員設定後才能確認合作條款並交稿。');
+    else if(!cst.accepted){
+      var miss=contractClauses(contractCtx(id,cst.cf)).filter(function(c){return !d.cl[c.n];}).length;
+      if(miss)e.push('請逐條勾選合作條款（還有 '+miss+' 條沒勾）。');
+      if(state.mode==='shared'&&!state.uid&&e.indexOf('目前無法確認登入身分，暫時不能儲存匯款資料。')<0)e.push('目前無法確認登入身分，暫時不能確認合作條款。');
+    }
+  }
+  if(isR){
+    if(d.storyTime&&!d.storyDate)e.push('設定限動發布時間前，請先選限動發布日。');
+    d.storyLinks.forEach(function(u,i){if(u.trim()&&!safeLink(u.trim()))e.push('限動連結 '+(i+1)+' 需要以 http:// 或 https:// 開頭。');});
+  }
+  return e;
+}
+function matKey(list){return JSON.stringify((list||[]).map(function(m){return [m.kind,m.url||m.aid||m.fid||''];}));}
+async function saveContent(){
+  var u=me(),isR=isRev(u),id=isR?state.editing:u.id,d=state.draft;
+  if(!id||!d)return;
+  if(!isR&&isClosed()){toast('已截稿，無法再更新。','err');render();return;}
+  if(state.uploading>0){toast('檔案還在上傳，請稍候。');return;}
+  var errs=validateDraft(d,isR,id);state.errors=errs;
+  if(errs.length){render();var el=$('.errs');if(el&&el.scrollIntoView)el.scrollIntoView({block:'center'});return;}
+  if(state.subs[id]&&!state.dirty){toast('沒有變更。');return;}
+  var newRev=0,existed=!!state.subs[id];
+  var ok=await guarded(async function(){
+    var cur=await api.getSub(id),now=new Date().toISOString();
+    if(cur&&cur.rev!==state.draftRev)throw {userMsg:'稿件剛被其他人更新，請先按「放棄修改並重新載入」取得最新內容。'};
+    var s=cur||blankSub(id,now),changed=[];
+    var T=function(v){return String(v||'').replace(/\r\n?/g,'\n').replace(/\s+$/,'');};
+    var title=T(d.title).replace(/\n/g,' ');
+    if(rtext(s.title)!==title){s.title=applyRuns(s.title,title,u.id);changed.push('title');}
+    var body=T(d.body);
+    if(rtext(s.body)!==body){s.body=applyRuns(s.body,body,u.id);changed.push('body');}
+    var tags=T(d.tags).replace(/\n/g,' ');
+    if(rtext(s.tags)!==tags){s.tags=applyRuns(s.tags,tags,u.id);changed.push('tags');}
+    var pf=PLATFORMS.filter(function(p){return d.platforms.indexOf(p)>=0;}),po=pf.indexOf('其他')>=0?d.platformOther.trim():'';
+    if(pf.join('|')!==PLATFORMS.filter(function(p){return s.platforms.indexOf(p)>=0;}).join('|')||po!==(s.platformOther||'')){s.platforms=pf;s.platformOther=po;s.fieldBy.platforms=u.id;changed.push('platforms');}
+    if(d.publishDate!==s.publishDate){s.publishDate=d.publishDate;s.fieldBy.publishDate=u.id;changed.push('publishDate');}
+    if(matKey(d.materials)!==matKey(s.materials)){s.materials=clone(d.materials);s.fieldBy.materials=u.id;changed.push('materials');}
+    if(isR){
+      var cap=T(d.storyCaption);
+      if(rtext(s.story.caption)!==cap){s.story.caption=applyRuns(s.story.caption,cap,u.id);changed.push('storyCaption');}
+      if(d.storyDate!==s.story.date){s.story.date=d.storyDate;s.fieldBy.storyDate=u.id;changed.push('storyDate');}
+      if(d.storyTime!==s.story.time){s.story.time=d.storyTime;s.fieldBy.storyTime=u.id;changed.push('storyTime');}
+      var links=d.storyLinks.map(function(x){return x.trim();}).filter(Boolean);
+      if(JSON.stringify(links)!==JSON.stringify(s.story.links)){s.story.links=links;s.fieldBy.storyLinks=u.id;changed.push('storyLinks');}
+    }
+    if(!isR&&d.payEdit){
+      var pp=d.pay,acct=pp.bankAccount.replace(/[\s-]/g,''),files={};
+      Object.keys(pp.files).forEach(function(k){var f=pp.files[k];files[k]={fid:f.fid,name:f.name,size:f.size};});
+      var payDoc={creatorId:id,uid:state.uid,bankName:pp.bankName.trim(),bankCode:pp.bankCode.trim(),bankAccount:acct,files:files,at:now};
+      await api.putPay(state.uid,id,payDoc);
+      s.pay={uid:state.uid,at:now,bankName:payDoc.bankName,bankCode:payDoc.bankCode,last4:acct.slice(-4),complete:true};
+      changed.push('pay');
+    }
+    if(!isR){
+      var cfd=await api.getCreatorFee(id);
+      if(!(cfd&&cfd.creatorFee!=null))throw {userMsg:'人選合作費用還沒有設定，請稍後再交稿。'};
+      var okC=!!(s.contract&&s.contract.version===CONTRACT.version&&s.contract.feeRev===cfd.rev);
+      if(!okC){
+        var seen=state.cfees[id];
+        if(!seen||seen.rev!==cfd.rev)throw {userMsg:'人選合作費用剛被更新，請重新確認合作條款。'};
+        var cl=contractClauses(contractCtx(id,cfd));
+        await api.putContract(state.uid,id,{creatorId:id,uid:state.uid,version:CONTRACT.version,at:now,creatorFee:cfd.creatorFee,payDays:cfd.payDays||30,feeRev:cfd.rev,agreed:cl.map(function(c){return c.n;}),clauses:cl});
+        s.contract={version:CONTRACT.version,at:now,uid:state.uid,feeRev:cfd.rev,payDays:cfd.payDays||30};
+        changed.push('contract');
+      }
+    }
+    if(!changed.length)throw {userMsg:'沒有變更。'};
+    s.rev=(cur?cur.rev:0)+1;newRev=s.rev;s.updatedAt=now;s.updatedBy=u.id;
+    if(isR){
+      if(s.status==='approved'||s.status==='confirmed')s.status='pending';
+      changed.forEach(function(f){if(s.reviewerEdits.indexOf(f)<0)s.reviewerEdits.push(f);});
+    }else{
+      s.status='pending';s.notice=null;s.reviewerEdits=[];
+    }
+    s.history=s.history.concat([{at:now,type:isR?'edit':(cur?'update':'submit'),by:u.id,v:s.rev,fields:changed}]).slice(-40);
+    await api.putSub(id,s);
+  },isR?'已儲存編修':(existed?'已更新，稿件重新送審':'稿件已送出'));
+  if(ok){
+    state.dirty=false;state.draftRev=newRev;state.errors=[];
+    if(isR){state.editing=null;state.draft=null;state.draftId=null;}
+    else if(state.draft){state.draft.payEdit=false;state.draft.pay=blankPay();state.draft.cl={};}
+    render();
+  }
+}
+async function addFiles(files){
+  var list=Array.from(files||[]);if(!list.length||!state.draft)return;
+  state.uploading+=list.length;render();
+  for(var i=0;i<list.length;i++){
+    try{state.draft.materials.push(await uploadOne(list[i]));state.dirty=true;}
+    catch(e){toast((e&&e.userMsg)||'上傳失敗，請稍後再試。','err');}
+    state.uploading--;
+  }
+  render();
+}
+function shrinkImage(file,mx,lim){
+  mx=mx||1280;lim=lim||190000;
+  return new Promise(function(res,rej){
+    var url=URL.createObjectURL(file),img=new Image();
+    img.onload=function(){
+      URL.revokeObjectURL(url);
+      var sc=Math.min(1,mx/Math.max(img.width,img.height)),q=0.82,out='';
+      for(var k=0;k<8;k++){
+        var cv=document.createElement('canvas');cv.width=Math.max(1,Math.round(img.width*sc));cv.height=Math.max(1,Math.round(img.height*sc));
+        var cx=cv.getContext('2d');cx.fillStyle='#fff';cx.fillRect(0,0,cv.width,cv.height);cx.drawImage(img,0,0,cv.width,cv.height);
+        out=cv.toDataURL('image/jpeg',q);
+        if(out.length<=lim)return res(out);
+        if(q>0.5)q-=0.1;else sc*=0.8;
+      }
+      rej({userMsg:'這張圖片太大，無法縮小到可儲存的大小。請改貼雲端連結。'});
+    };
+    img.onerror=function(){URL.revokeObjectURL(url);rej({userMsg:'無法讀取這個圖片檔。'});};
+    img.src=url;
+  });
+}
+async function addPayFile(kind,file){
+  if(!file||!state.draft)return;
+  if(!/^image\/(png|jpeg|gif|webp)$/.test(file.type)){toast('請上傳圖片檔（JPG、PNG）。','err');return;}
+  if(!state.uid){toast('目前無法確認登入身分，無法上傳證件。','err');return;}
+  var uid=state.uid;
+  state.uploading++;render();
+  try{
+    var data=await shrinkImage(file,1600,215000);
+    var fid='p'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+    await api.putPayFile(uid,fid,{name:file.name,type:'image/jpeg',data:data});
+    payCache[fid]=data;
+    var old=state.draft.pay.files[kind];
+    state.draft.pay.files[kind]={fid:fid,name:file.name,size:Math.round(data.length*0.75),fresh:true};
+    state.dirty=true;
+    if(old&&old.fresh)api.delPayFile(uid,old.fid).catch(function(){});
+  }catch(e){
+    toast((e&&e.userMsg)||'上傳失敗，請稍後再試。','err');
+  }
+  state.uploading--;render();
+}
+async function uploadOne(f){
+  var by=me().id;
+  if(f.size>20*1048576)throw {userMsg:'「'+f.name+'」超過 20 MB，請改貼雲端連結。'};
+  if(state.assets){
+    try{
+      var r=await state.assets.upload(f);
+      return {kind:'file',aid:r.id,name:f.name,type:r.contentType,size:r.sizeBytes,by:by};
+    }catch(e){
+      var code=e&&e.code;
+      if(code==='unsupported_type')throw {userMsg:'「'+f.name+'」的格式不支援。可用 png、jpg、gif、webp、mp4、webm 或 pdf。'};
+      if(code==='too_large')throw {userMsg:'「'+f.name+'」檔案太大，請改貼雲端連結。'};
+      if(code==='quota_or_state')throw {userMsg:'這個頁面的檔案空間已滿，請改貼雲端連結。'};
+      if(code==='rate_limited')throw {userMsg:'上傳太頻繁，請稍後再試。'};
+      /* 沒有上傳權限時，改走圖片縮圖路徑 */
+    }
+  }
+  if(!/^image\/(png|jpeg|gif|webp)$/.test(f.type))throw {userMsg:'目前的權限只能上傳圖片。影片或 PDF 請貼雲端連結。'};
+  var data=await shrinkImage(f),fid='f'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+  await api.putFile(fid,{name:f.name,type:'image/jpeg',data:data});
+  fileCache[fid]=data;
+  return {kind:'file',fid:fid,name:f.name,type:'image/jpeg',size:Math.round(data.length*0.75),by:by};
+}
+function addLink(){
+  var el=$('#f-link'),v=(el.value||'').trim();
+  if(!safeLink(v)){toast('連結需要以 http:// 或 https:// 開頭。','err');return;}
+  state.draft.materials.push({kind:'link',url:v,by:me().id});state.dirty=true;render();
+}
+function startEdit(){
+  var s=state.subs[state.sel];if(!s)return;
+  state.editing=state.sel;state.draft=draftFrom(s,state.sel);state.draftId=state.sel;state.draftRev=s.rev;state.dirty=false;state.errors=[];render();
+}
+function cancelEdit(){state.editing=null;state.draft=null;state.draftId=null;state.dirty=false;state.errors=[];render();}
+function reloadDraft(){
+  var u=me(),id=isRev(u)?state.editing:u.id,s=state.subs[id]||null;
+  state.draft=draftFrom(s,id);state.draftId=id;state.draftRev=s?s.rev:0;state.draftBriefAt=state.briefs[id]?state.briefs[id].at:'';state.dirty=false;state.errors=[];render();
+}
+async function notifyCreator(){
+  var id=state.sel,u=me();
+  if(state.editing){toast('請先儲存或取消編修。');return;}
+  var msg=(state.msg[id]||'').trim(),sent=0;
+  var ok=await guarded(async function(){
+    var cur=await api.getSub(id);if(!cur)throw {userMsg:'找不到這份稿件，請重新整理。'};
+    var now=new Date().toISOString();
+    cur.status='confirming';
+    cur.notice={by:u.id,at:now,message:msg,fields:cur.reviewerEdits.slice()};
+    cur.history=cur.history.concat([{at:now,type:'notify',by:u.id,v:cur.rev,note:msg,fields:cur.reviewerEdits.slice()}]).slice(-40);
+    await api.putSub(id,cur);sent=1;
+  },'已通知 '+nameOf(id)+' 查看確認');
+  if(ok&&sent)state.msg[id]='';
+}
+async function approve(){
+  var id=state.sel,u=me(),s=state.subs[id];
+  if(state.editing){toast('請先儲存或取消編修。');return;}
+  if(!s)return;
+  var rv=getReview(id,s),msg=(state.msg[id]||'').trim();
+  state.reviewErr='';
+  if(rv.checks.some(function(x){return !x;})){state.reviewErr='檢查清單還有項目沒勾選。全部確認後才能定稿。';render();return;}
+  var ok=await guarded(async function(){
+    var cur=await api.getSub(id);if(!cur)throw {userMsg:'找不到這份稿件，請重新整理。'};
+    if(cur.rev!==rv.v){delete state.review[id];throw {userMsg:'稿件剛被更新，請重新檢視後再定稿。'};}
+    var now=new Date().toISOString();
+    cur.status='approved';cur.review={checks:rv.checks.slice(),by:u.id,at:now,rev:cur.rev};cur.notice=null;cur.reviewerEdits=[];
+    cur.history=cur.history.concat([{at:now,type:'approved',by:u.id,v:cur.rev,note:msg}]).slice(-40);
+    await api.putSub(id,cur);
+  },'已定稿');
+  if(ok)state.msg[id]='';
+}
+async function reopen(){
+  var id=state.sel,u=me();
+  await guarded(async function(){
+    var cur=await api.getSub(id);if(!cur)throw {userMsg:'找不到這份稿件。'};
+    var now=new Date().toISOString();
+    cur.status='pending';cur.notice=null;
+    cur.history=cur.history.concat([{at:now,type:'reopen',by:u.id,v:cur.rev}]).slice(-40);
+    await api.putSub(id,cur);
+  },'已改回待審');
+}
+async function confirmByCreator(){
+  var u=me();
+  if(state.dirty){toast('你有尚未儲存的修改。請先按「更新稿件」，或重新載入。','err');return;}
+  await guarded(async function(){
+    var cur=await api.getSub(u.id);
+    if(!cur||cur.status!=='confirming')throw {userMsg:'目前沒有需要確認的內容。'};
+    var now=new Date().toISOString();
+    cur.status='confirmed';cur.notice=null;cur.reviewerEdits=[];
+    cur.history=cur.history.concat([{at:now,type:'confirm',by:u.id,v:cur.rev}]).slice(-40);
+    await api.putSub(u.id,cur);
+  },'已確認，等審稿員定稿');
+}
+/* ---------- 結案數據動作 ---------- */
+async function closeReview(decision){
+  var id=state.sel,u=me();
+  if(!allow('confirmClose'))return;
+  var msg=(state.cmsg[id]||'').trim();
+  if(decision==='returned'&&!msg){state.cerr='退回補件時，請寫下需要補什麼。';render();var n=$('#cmsg');if(n)n.focus();return;}
+  state.cerr='';
+  var ok=await guarded(async function(){
+    var cur=await api.getSub(id);
+    if(!cur||!cur.close||cur.close.status!=='submitted')throw {userMsg:'這份數據目前不在待確認狀態，請重新整理。'};
+    var now=new Date().toISOString();
+    cur.close.status=decision==='closed'?'closed':'returned';
+    cur.close.review={decision:decision,by:u.id,at:now,note:msg};
+    if(decision==='closed')cur.close.closedAt=now;
+    cur.history=cur.history.concat([{at:now,type:decision==='closed'?'closeDone':'closeReturn',by:u.id,v:cur.rev,note:msg}]).slice(-40);
+    await api.putSub(id,cur);
+  },decision==='closed'?'已結案':'已退回補件');
+  if(ok)state.cmsg[id]='';
+}
+async function setPaid(on){
+  var id=state.sel,u=me();
+  if(!allow('markPaid'))return;
+  await guarded(async function(){
+    var cur=await api.getSub(id);
+    if(!cur||!cur.close||cur.close.status!=='closed')throw {userMsg:'這份稿件還沒有結案。'};
+    var now=new Date().toISOString();
+    cur.close.paid=on?{at:now,by:u.id,date:todayStr()}:null;
+    cur.history=cur.history.concat([{at:now,type:on?'paid':'unpaid',by:u.id,v:cur.rev}]).slice(-40);
+    await api.putSub(id,cur);
+  },on?'已標記為已付款':'已撤銷付款標記');
+}
+function ensureCDraft(s){
+  var id=me().id,at=s.close?s.close.submittedAt:'';
+  if(!state.cdraft||state.cdraft.id!==id||(!state.cdraft.dirty&&state.cdraft.at!==at)){
+    var blocks={};
+    closeBlocks(s).forEach(function(b){
+      var d=(s.close&&s.close.blocks&&s.close.blocks[b.key])||{};
+      blocks[b.key]={views:d.views!=null?String(d.views):'',inter:d.inter!=null?String(d.inter):'',accounts:d.accounts!=null?String(d.accounts):'',note:d.note||'',shots:(d.shots||[]).slice()};
+    });
+    state.cdraft={id:id,at:at,blocks:blocks,dirty:false,edit:false,errors:[]};
+  }
+}
+async function addShots(key,fileList){
+  var d=state.cdraft;
+  if(!d||!d.blocks[key])return;
+  var list=Array.from(fileList||[]).filter(function(f){return /^image\//.test(f.type);});
+  if(!list.length){toast('請上傳圖片檔（後台數據截圖）。','err');return;}
+  var room=4-d.blocks[key].shots.length;
+  if(room<=0){toast('每個區塊最多 4 張截圖。','err');return;}
+  list=list.slice(0,room);
+  state.uploading+=list.length;render();
+  for(var i=0;i<list.length;i++){
+    try{d.blocks[key].shots.push(await uploadOne(list[i]));d.dirty=true;}
+    catch(e){toast((e&&e.userMsg)||'上傳失敗，請稍後再試。','err');}
+    state.uploading--;
+  }
+  render();
+}
+async function submitClose(){
+  var u=me(),s0=state.subs[u.id],d=state.cdraft;
+  if(!s0||!d)return;
+  if(state.uploading>0){toast('檔案還在上傳，請稍候。');return;}
+  var errs=[],blocks={};
+  closeBlocks(s0).forEach(function(b){
+    var x=d.blocks[b.key]||{views:'',inter:'',accounts:'',note:'',shots:[]},ok=true,v={};
+    [['views','瀏覽次數'],['inter','互動次數'],['accounts','互動帳號']].forEach(function(f){
+      var t=String(x[f[0]]||'').replace(/[,\s]/g,'');
+      if(!/^\d{1,10}$/.test(t)){errs.push(b.label+'：請填寫'+f[1]+'（只填數字）。');ok=false;}else v[f[0]]=+t;
+    });
+    if(ok&&v.accounts>v.inter)errs.push(b.label+'：互動帳號不會比互動次數多，請再確認數字。');
+    if(!x.shots.length)errs.push(b.label+'：請上傳至少一張後台數據截圖。');
+    blocks[b.key]={views:v.views,inter:v.inter,accounts:v.accounts,note:(x.note||'').trim(),shots:x.shots};
+  });
+  d.errors=errs;
+  if(errs.length){render();var el=$('#close-form .errs');if(el&&el.scrollIntoView)el.scrollIntoView({block:'center'});return;}
+  var ok=await guarded(async function(){
+    var cur=await api.getSub(u.id);
+    if(!cur||cur.status!=='approved')throw {userMsg:'稿件目前不是「已定稿」狀態，暫時不能上傳結案數據。'};
+    if(cur.close&&cur.close.status==='closed')throw {userMsg:'這份稿件已經結案，不能再更新數據。'};
+    var now=new Date().toISOString(),due=metricsDue(cur);
+    cur.close={status:'submitted',blocks:blocks,submittedAt:now,submittedBy:u.id,due:due,late:!!due&&todayStr()>due,review:null,paid:null};
+    cur.history=cur.history.concat([{at:now,type:'closeSubmit',by:u.id,v:cur.rev}]).slice(-40);
+    await api.putSub(u.id,cur);
+  },'結案數據已送出，等審稿員確認');
+  if(ok){state.cdraft=null;render();}
+}
+async function saveDeadline(deadlineIso){
+  var iso=deadlineIso;
+  if(!iso){
+    var v=($('#dl-input')||{}).value,t=v?Date.parse(v+':00+08:00'):NaN;
+    if(isNaN(t)){toast('請先選好截稿日期與時間。','err');return;}
+    iso=new Date(t).toISOString();
+  }
+  await guarded(async function(){var c=clone(state.campaign);c.deadline=iso;await api.putCampaign(c);},'已更新截稿時間');
+}
+async function seedAll(){
+  var s=demoSeed(Date.now()),u=me(),i;
+  await api.putCampaign(s.campaign);
+  var ids=Object.keys(s.accounts);
+  for(i=0;i<ids.length;i++)await api.putAccount(ids[i],s.accounts[ids[i]]);
+  var extra=state.accounts.filter(function(a){return !s.accounts[a.id]&&(!u||a.id!==u.id);});
+  for(i=0;i<extra.length;i++){await api.delAccount(extra[i].id);await api.delSub(extra[i].id);await api.delBrief(extra[i].id);}
+  var fk0=Object.keys(s.files||{});
+  for(i=0;i<fk0.length;i++)await api.putFile(fk0[i],s.files[fk0[i]]);
+  var cs=ids.filter(function(k){return s.accounts[k].role==='creator';});
+  for(i=0;i<cs.length;i++){
+    if(s.subs[cs[i]])await api.putSub(cs[i],s.subs[cs[i]]);else await api.delSub(cs[i]);
+    if(s.briefs[cs[i]])await api.putBrief(cs[i],s.briefs[cs[i]]);else await api.delBrief(cs[i]);
+  }
+  state.review={};state.msg={};state.editing=null;state.draft=null;state.dirty=false;state.payView={};
+  try{
+    var pk=Object.keys(s.pay.forms),fk=Object.keys(s.pay.files),ck=Object.keys(s.pay.contracts||{});
+    for(i=0;i<pk.length;i++)await api.putPay(s.pay.uid,pk[i],s.pay.forms[pk[i]]);
+    for(i=0;i<fk.length;i++)await api.putPayFile(s.pay.uid,fk[i],s.pay.files[fk[i]]);
+    for(i=0;i<ck.length;i++)await api.putContract(s.pay.uid,ck[i],s.pay.contracts[ck[i]]);
+    var cf=Object.keys(s.fees.creator),bf=Object.keys(s.fees.brand);
+    for(i=0;i<cf.length;i++)await api.putCreatorFee(cf[i],s.fees.creator[cf[i]]);
+    for(i=0;i<bf.length;i++)await api.putBrandFee(bf[i],s.fees.brand[bf[i]]);
+  }catch(e){toast('示範的匯款、費用與合約資料沒有寫入（需要編輯者以上權限），其餘資料已重設。','err');}
+}
+async function resetDemo(){
+  if(!state.resetArm){
+    state.resetArm=true;render();
+    setTimeout(function(){if(state.resetArm){state.resetArm=false;render();}},5000);
+    return;
+  }
+  state.resetArm=false;
+  await guarded(seedAll,'已重設為示範資料');
+}
+async function addAccount(){
+  if(!allow('manageAccounts'))return;
+  var f=state.accForm,name=f.name.trim(),id=f.id.trim().toLowerCase(),pw=f.pw;
+  f.err='';
+  if(!name)f.err='請填寫顯示名稱。';
+  else if(!/^[a-z0-9_-]{3,20}$/.test(id))f.err='登入帳號請用 3–20 個英文小寫、數字、- 或 _。';
+  else if(acc(id))f.err='這個帳號已經有人使用。';
+  else if(pw.length<4)f.err='密碼至少要 4 個字。';
+  if(f.err){render();return;}
+  var used={};reviewers().forEach(function(r){used[r.hue]=1;});
+  var hue=f.role==='reviewer'?(f.hue!=null?f.hue:(HUES.filter(function(x){return !used[x.h];})[0]||HUES[0]).h):Math.floor(Math.random()*360);
+  var ok=await guarded(async function(){
+    var ex=await api.getAccount(id);if(ex)throw {userMsg:'這個帳號已經有人使用。'};
+    var rec={id:id,name:name,role:f.role,pw:pw,hue:hue};
+    if(f.role==='creator')rec.platform=f.platform;
+    else rec.level=(+f.level===5?5:1);
+    await api.putAccount(id,rec);
+  },'已新增帳號：'+name);
+  if(ok)state.accForm={role:f.role,name:'',id:'',pw:'',hue:null,level:1,platform:'Instagram',err:''};
+  render();
+}
+async function setLevel(id,n){
+  var a=acc(id);
+  if(!a||!isRev(a)||!allow('manageAccounts'))return;
+  if(id===me().id){toast('不能調整自己的等級。','err');render();return;}
+  if(!LEVELS.some(function(l){return l.n===n&&!l.reserved;})){render();return;}
+  await guarded(async function(){
+    var cur=await api.getAccount(id);if(!cur)throw {userMsg:'找不到這個帳號。'};
+    cur.level=n;await api.putAccount(id,cur);
+  },a.name+' 已設為 '+levelLabel(n));
+}
+async function delAccount(id){
+  if(!allow('manageAccounts'))return;
+  if(state.delArm!==id){
+    state.delArm=id;render();
+    setTimeout(function(){if(state.delArm===id){state.delArm=null;render();}},5000);
+    return;
+  }
+  state.delArm=null;
+  var a=acc(id);if(!a)return;
+  await guarded(async function(){
+    if(a.role==='creator'){await api.delSub(id);await api.delBrief(id);}
+    await api.delAccount(id);
+  },'已移除帳號：'+a.name);
+}
+function act(name,el){
+  switch(name){
+    case 'fill':{var a=acc(el.dataset.id);if(a){state.loginId=a.id;state.loginPw=a.pw;state.loginErr='';render();}break;}
+    case 'logout':doLogout();break;
+    case 'toggleAcc':
+      if(state.view==='main'&&!allow('manageAccounts')){toast('帳號管理只有 LV 審稿員可以使用。','err');break;}
+      if(state.editing&&state.dirty){toast('請先儲存或取消目前的編修。');break;}
+      state.view=state.view==='main'?'accounts':'main';state.editing=null;state.draft=null;render();break;
+    case 'newBrief':
+      if(state.editing&&state.dirty){toast('請先儲存或取消目前的編修。');break;}
+      state.editing=null;state.draft=null;state.brief={target:null,f:blankBriefForm()};state.view='brief';render();window.scrollTo(0,0);break;
+    case 'openBrief':
+      if(state.editing&&state.dirty){toast('請先儲存或取消目前的編修。');break;}
+      state.editing=null;state.draft=null;state.brief={target:el.dataset.id,f:briefFormFrom(state.briefs[el.dataset.id]||{},el.dataset.id)};state.view='brief';render();window.scrollTo(0,0);break;
+    case 'cancelBrief':state.view='main';state.brief={target:null,f:null};render();break;
+    case 'select':
+      if(state.editing&&state.editing!==el.dataset.id){
+        if(state.dirty){toast('請先儲存或取消目前的編修。');break;}
+        state.editing=null;state.draft=null;
+      }
+      state.sel=el.dataset.id;state.mobileDetail=true;state.reviewErr='';render();
+      if(window.matchMedia('(max-width:860px)').matches)window.scrollTo(0,0);break;
+    case 'back':
+      if(state.editing&&state.dirty){toast('請先儲存或取消目前的編修。');break;}
+      state.editing=null;state.draft=null;state.mobileDetail=false;render();break;
+    case 'filter':state.filter=el.dataset.v;render();break;
+    case 'tile':
+      if(state.editing&&state.dirty){toast('請先儲存或取消目前的編修。');break;}
+      state.filter=el.dataset.k;state.dash='list';state.mobileDetail=false;state.editing=null;state.draft=null;
+      var first=filteredCreators()[0];if(first)state.sel=first.id;
+      render();break;
+    case 'dash':
+      if(state.editing&&state.dirty){toast('請先儲存或取消目前的編修。');break;}
+      state.dash=el.dataset.v;if(state.dash==='cal'){state.editing=null;state.draft=null;state.mobileDetail=false;}render();break;
+    case 'calPrev':calInit();state.calM--;if(state.calM<0){state.calM=11;state.calY--;}render();break;
+    case 'calNext':calInit();state.calM++;if(state.calM>11){state.calM=0;state.calY++;}render();break;
+    case 'calToday':{state.calY=null;calInit();render();break;}
+    case 'calGo':state.calY=+el.dataset.y;state.calM=+el.dataset.m;render();break;
+    case 'calDay':state.calSel=el.dataset.d;render();break;
+    case 'calOpen':
+      state.sel=el.dataset.id;state.dash='list';state.mobileDetail=true;state.reviewErr='';state.filter='all';render();window.scrollTo(0,0);break;
+    case 'startEdit':startEdit();break;
+    case 'cancelEdit':cancelEdit();break;
+    case 'reloadDraft':reloadDraft();break;
+    case 'notify':notifyCreator();break;
+    case 'approve':approve();break;
+    case 'reopen':reopen();break;
+    case 'confirm':confirmByCreator();break;
+    case 'gotoForm':{var f=$('#sub-form');if(f&&f.scrollIntoView)f.scrollIntoView({behavior:'smooth',block:'start'});break;}
+    case 'payEdit':state.draft.payEdit=true;state.draft.pay=blankPay();state.dirty=true;render();break;
+    case 'payCancel':state.draft.payEdit=false;state.draft.pay=blankPay();render();break;
+    case 'zoom':el.classList.toggle('big');break;
+    case 'closeOk':closeReview('closed');break;
+    case 'closeReturn':closeReview('returned');break;
+    case 'markPaid':setPaid(true);break;
+    case 'unpaid':setPaid(false);break;
+    case 'closeEdit':if(state.cdraft){state.cdraft.edit=true;render();}break;
+    case 'closeCancel':state.cdraft=null;render();break;
+    case 'rmShot':{var cb=state.cdraft&&state.cdraft.blocks[el.dataset.k];if(cb){cb.shots.splice(+el.dataset.i,1);state.cdraft.dirty=true;render();}break;}
+    case 'exportCsv':exportCsv();break;
+    case 'dlPay':dlPayImage(el.dataset.k);break;
+    case 'copy':{
+      var tx=el.dataset.text||'';
+      try{navigator.clipboard.writeText(tx).then(function(){toast('已複製');},function(){toast('無法自動複製，請手動選取。','err');});}
+      catch(e){toast('無法自動複製，請手動選取。','err');}
+      break;
+    }
+    case 'addLink':addLink();break;
+    case 'rmMat':state.draft.materials.splice(+el.dataset.i,1);state.dirty=true;render();break;
+    case 'addSl':state.draft.storyLinks.push('');state.dirty=true;render();break;
+    case 'rmSl':state.draft.storyLinks.splice(+el.dataset.i,1);if(!state.draft.storyLinks.length)state.draft.storyLinks=[''];state.dirty=true;render();break;
+    case 'saveDeadline':saveDeadline();break;
+    case 'closeNow':saveDeadline(new Date(Date.now()-60000).toISOString());break;
+    case 'extend':saveDeadline(nextDeadlineISO());break;
+    case 'reset':if(allow('resetDemo'))resetDemo();break;
+    case 'loadDemo':if(allow('resetDemo'))guarded(seedAll,'已載入示範資料');else toast('載入示範資料需要 LV 審稿員。','err');break;
+    case 'delAcc':delAccount(el.dataset.id);break;
+  }
+}
+
+/* ---------- 事件 ---------- */
+function syncField(t){
+  if(t.dataset&&t.dataset.f&&state.draft){
+    state.draft[t.dataset.f]=t.value;state.dirty=true;
+    if(t.dataset.f==='body'){var c=$('#count');if(c)c.textContent=wc(t.value)+' 字';}
+  }else if(t.id==='cmsg'&&state.sel){
+    state.cmsg[state.sel]=t.value;
+  }else if(t.dataset&&t.dataset.cm&&state.cdraft){
+    var kp=t.dataset.cm.split('|'),cb=state.cdraft.blocks[kp[0]];
+    if(cb){cb[kp[1]]=t.value;state.cdraft.dirty=true;}
+  }else if(t.dataset&&t.dataset.p&&state.draft){
+    state.draft.pay[t.dataset.p]=t.value;state.dirty=true;
+  }else if(t.dataset&&t.dataset.sl!=null&&state.draft){
+    state.draft.storyLinks[+t.dataset.sl]=t.value;state.dirty=true;
+  }else if(t.id==='msg'&&state.sel){
+    state.msg[state.sel]=t.value;
+  }else if(t.id==='q'){
+    state.q=t.value;if(!composing)renderList();
+  }else if(t.dataset&&t.dataset.af){
+    if(t.type==='radio'){if(t.checked)state.accForm.hue=+t.value;}
+    else state.accForm[t.dataset.af]=t.value;
+  }else if(t.dataset&&t.dataset.bf&&state.brief.f){
+    state.brief.f[t.dataset.bf]=t.value;
+  }
+}
+function wire(){
+  var app=$('#app');
+  app.addEventListener('click',function(e){
+    var b=e.target.closest('[data-act]');
+    if(!b||b.disabled)return;
+    act(b.dataset.act,b);
+  });
+  app.addEventListener('input',function(e){if(e.target.type==='file')return;syncField(e.target);});
+  app.addEventListener('change',function(e){
+    var t=e.target;
+    if(t.type==='file'){
+      if(t.dataset.pay)addPayFile(t.dataset.pay,t.files[0]);
+      else if(t.dataset.cshot)addShots(t.dataset.cshot,t.files);
+      else addFiles(t.files);
+      t.value='';return;
+    }
+    if(t.dataset&&t.dataset.lv){setLevel(t.dataset.lv,+t.value);return;}
+    if(t.dataset&&t.dataset.chk!=null&&state.sel&&state.review[state.sel]){
+      var r=state.review[state.sel];r.checks[+t.dataset.chk]=t.checked;
+      var c=$('#chkcount');if(c)c.textContent=r.checks.filter(Boolean).length+' / '+CHECKS.length;
+    }else if(t.dataset&&t.dataset.cl&&state.draft){
+      state.draft.cl[+t.dataset.cl]=t.checked;state.dirty=true;
+      var cc=$('#clcount');if(cc)cc.textContent=Object.keys(state.draft.cl).filter(function(k){return state.draft.cl[k];}).length+' / '+document.querySelectorAll('[data-cl]').length;
+    }else if(t.dataset&&t.dataset.pf&&state.draft){
+      var list=state.draft.platforms,i=list.indexOf(t.dataset.pf);
+      if(t.checked&&i<0)list.push(t.dataset.pf);else if(!t.checked&&i>=0)list.splice(i,1);
+      state.dirty=true;render();
+    }else if(t.dataset&&t.dataset.bpf&&state.brief.f){
+      var bl=state.brief.f.platforms,bi=bl.indexOf(t.dataset.bpf);
+      if(t.checked&&bi<0)bl.push(t.dataset.bpf);else if(!t.checked&&bi>=0)bl.splice(bi,1);
+      render();
+    }else if(t.dataset&&t.dataset.f){syncField(t);}
+    else if(t.dataset&&t.dataset.bf){syncField(t);}
+    else if(t.dataset&&t.dataset.af){syncField(t);if(t.id==='a-role')render();}
+  });
+  app.addEventListener('toggle',function(e){if(e.target.id==='dl-details')state.dlOpen=e.target.open;},true);
+  app.addEventListener('submit',function(e){
+    e.preventDefault();
+    if(e.target.id==='login-form')doLogin();
+    else if(e.target.id==='sub-form')saveContent();
+    else if(e.target.id==='acc-form')addAccount();
+    else if(e.target.id==='brief-form')saveBrief();
+    else if(e.target.id==='close-form')submitClose();
+  });
+  app.addEventListener('keydown',function(e){
+    if(e.key==='Enter'&&e.target.tagName==='INPUT'&&e.target.closest('#sub-form,#brief-form,#close-form')&&e.target.type!=='checkbox'){
+      e.preventDefault();
+      if(e.target.id==='f-link')addLink();
+    }
+  });
+  app.addEventListener('compositionstart',function(){composing=true;});
+  app.addEventListener('compositionend',function(e){
+    composing=false;syncField(e.target);
+    if(pendingRender)render();
+    else if(e.target.id==='q')renderList();
+  });
+  setInterval(function(){
+    if(!state.campaign||!me())return;
+    var closed=isClosed();
+    if(closed!==lastClosed){scheduleRender();return;}
+    var cd=countdown();
+    document.querySelectorAll('[data-cd]').forEach(function(n){
+      n.textContent=cd.text;n.classList.toggle('urgent',cd.urgent);n.classList.toggle('closed',cd.closed);
+    });
+  },30000);
+}
+
+wire();
+boot();
+})();
+</script>
+</body>
+</html>
