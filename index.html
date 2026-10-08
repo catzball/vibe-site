@@ -2725,7 +2725,7 @@ boot();
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 // 只放專案網址與 Publishable key，這兩樣可以公開。
-// 絕不放 service_role、sb_secret 或資料庫密碼。
+// 絕不放任何 Secret key 或資料庫密碼。
 const SUPABASE_URL = "https://wmbrxtuvjuxojvisvlsu.supabase.co";
 const SUPABASE_KEY = "sb_publishable_4Mxyi-egLN4Woj9YCHBjfg_SjNR-xqi";
 const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
