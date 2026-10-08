@@ -2687,5 +2687,118 @@ wire();
 boot();
 })();
 </script>
+<style>
+.cloud-wrap{max-width:1180px;margin:0 auto;padding-inline:16px;padding-bottom:56px}
+.cloud h2{font:700 20px/1.4 var(--f-serif);margin:2px 0 4px}
+.cloud-list{display:grid;margin:16px 0}
+.cloud-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:6px 12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.cloud-row:last-child{border-bottom:0}
+.cloud-row .nm{font-weight:500;overflow-wrap:anywhere}
+.cloud-row .fans{min-width:4.5em;text-align:right;font-size:13px;color:var(--ink-2);font-family:var(--f-mono)}
+.cloud-form{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1.2fr) minmax(0,1fr) auto;gap:12px;align-items:end;padding-top:16px;border-top:1px solid var(--line)}
+.cloud-msg{min-height:1.5em;font-size:13.5px;margin-top:10px}
+@media (max-width:700px){
+  .cloud-form{grid-template-columns:minmax(0,1fr)}
+  .cloud-row{grid-template-columns:minmax(0,1fr) auto}
+  .cloud-row .fans{grid-column:1 / -1;text-align:left}
+}
+</style>
+
+<div class="cloud-wrap" id="cloud" hidden>
+  <section class="card pad cloud" aria-labelledby="cloud-h">
+    <p class="eyebrow">SUPABASE 雲端資料庫</p>
+    <h2 id="cloud-h">合作人選名單</h2>
+    <p class="muted small">這份名單存在雲端資料庫，每個人打開都看得到，也可以新增。請只填公開的名稱與平台，不要填個人資料。</p>
+    <ul class="cloud-list" id="cloud-list" aria-live="polite"><li class="muted small">讀取中…</li></ul>
+    <form class="cloud-form" id="cloud-form" novalidate>
+      <div class="fld"><label for="cl-name">名稱</label><input id="cl-name" maxlength="40" autocomplete="off" placeholder="例如：test"></div>
+      <div class="fld"><label for="cl-plat">平台</label>
+        <select id="cl-plat"><option>Instagram</option><option>Facebook</option><option>Threads</option><option>YouTube</option><option>部落格</option><option>其他</option></select></div>
+      <div class="fld"><label for="cl-fans"><span>追蹤數</span><span class="opt">選填</span></label><input id="cl-fans" maxlength="20" autocomplete="off" placeholder="例如：3.2 萬"></div>
+      <button class="btn primary" type="submit" id="cl-btn">新增</button>
+    </form>
+    <p class="cloud-msg" id="cl-msg" role="status"></p>
+  </section>
+</div>
+
+<script type="module">
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+// 只放專案網址與 Publishable key，這兩樣可以公開。
+// 絕不放 service_role、sb_secret 或資料庫密碼。
+const SUPABASE_URL = "https://wmbrxtuvjuxojvisvlsu.supabase.co";
+const SUPABASE_KEY = "sb_publishable_4Mxyi-egLN4Woj9YCHBjfg_SjNR-xqi";
+const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const box = document.getElementById("cloud");
+const list = document.getElementById("cloud-list");
+const form = document.getElementById("cloud-form");
+const msg = document.getElementById("cl-msg");
+const btn = document.getElementById("cl-btn");
+
+function say(text, bad) {
+  msg.textContent = text;
+  msg.style.color = bad ? "var(--bad)" : "var(--ink-2)";
+}
+function note(text) {
+  const li = document.createElement("li");
+  li.className = "muted small";
+  li.textContent = text;
+  return li;
+}
+// 名單內容是任何人都能新增的，一律用 textContent 放進畫面，不當成 HTML。
+function row(c) {
+  const li = document.createElement("li");
+  li.className = "cloud-row";
+  const nm = document.createElement("span");
+  nm.className = "nm";
+  nm.textContent = c.name;
+  const plat = document.createElement("span");
+  plat.className = "pill st-none";
+  plat.textContent = c.platform;
+  const fans = document.createElement("span");
+  fans.className = "fans";
+  fans.textContent = c.fans || "";
+  li.append(nm, plat, fans);
+  return li;
+}
+
+async function load() {
+  const { data, error } = await sb
+    .from("creators")
+    .select("id,name,platform,fans,created_at")
+    .order("created_at", { ascending: false })
+    .limit(50);
+  if (error) {
+    list.replaceChildren(note("目前讀不到雲端名單：" + error.message));
+    return;
+  }
+  list.replaceChildren(...(data.length ? data.map(row) : [note("名單還是空的，新增第一位吧。")]));
+}
+
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const name = document.getElementById("cl-name").value.trim();
+  const platform = document.getElementById("cl-plat").value;
+  const fans = document.getElementById("cl-fans").value.trim();
+  if (!name) { say("請先填寫名稱。", true); return; }
+  btn.disabled = true;
+  say("新增中…");
+  const { error } = await sb.from("creators").insert({ name, platform, fans: fans || null });
+  btn.disabled = false;
+  if (error) { say("新增失敗：" + error.message, true); return; }
+  document.getElementById("cl-name").value = "";
+  document.getElementById("cl-fans").value = "";
+  say("已新增，重新整理頁面後也會還在。");
+  await load();
+});
+
+// 只在登入畫面顯示這個區塊（登入後的系統畫面不受影響）。
+const app = document.getElementById("app");
+const sync = () => { box.hidden = !document.getElementById("login-form"); };
+new MutationObserver(sync).observe(app, { childList: true });
+sync();
+load();
+</script>
 </body>
 </html>
